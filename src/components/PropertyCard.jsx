@@ -47,28 +47,26 @@ const PropertyCard = ({ property }) => {
         {/* Specs List */}
         <ul className="space-y-2.5 text-sm text-slate-muted mb-6 flex-grow">
           <li className="flex items-start gap-2">
-            <span className="text-gold mt-0.5 select-none">►</span>
             <span>
               By <strong className="text-slate-dark font-semibold">{developer}</strong>
             </span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-gold mt-0.5 select-none">►</span>
             <span className="line-clamp-1 text-slate-muted">{location}</span>
           </li>
-          <li className="flex items-start gap-2">
-            <span className="text-gold mt-0.5 select-none">►</span>
+          
+          {/* Render offers as bullet points if it's an array, or split by ◆ if it's a string */}
+          {offer && (Array.isArray(offer) ? offer : offer.split('◆').filter(Boolean).map(o => '◆ ' + o.trim())).map((bullet, idx) => (
+            <li key={idx} className="flex items-start gap-2">
+              <span className="text-slate-dark font-medium">{bullet}</span>
+            </li>
+          ))}
+
+          <li className="flex items-start gap-2 pt-2">
             <span className="font-semibold text-slate-dark">{bhk}</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-gold mt-0.5 select-none">►</span>
-            <span className="font-bold text-gold">{price}</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-gold mt-0.5 select-none">►</span>
-            <span className="text-emerald-700 bg-emerald-500/10 px-2.5 py-0.5 rounded text-xs font-semibold border border-emerald-500/20">
-              {offer}
-            </span>
+            <span className="font-bold text-gold text-base">{price}</span>
           </li>
         </ul>
 
