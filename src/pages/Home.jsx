@@ -101,7 +101,7 @@ const Home = () => {
               {filteredProperties.map((property) => (
                 <div
                   key={property.id}
-                  className="transform transition-all duration-500 animate-fadeIn"
+                  className="transform transition-all duration-500 animate-fadeIn h-full"
                 >
                   <PropertyCard property={property} onEnquire={handleEnquire} />
                 </div>
