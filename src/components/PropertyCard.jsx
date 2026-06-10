@@ -47,7 +47,7 @@ const PropertyCard = ({ property }) => {
         {/* Specs List */}
         <ul className="space-y-2.5 text-sm text-slate-muted mb-6 flex-grow">
           <li className="flex items-start gap-2">
-            <span>
+            <span className="line-clamp-1">
               By <strong className="text-slate-dark font-semibold">{developer}</strong>
             </span>
           </li>
@@ -58,15 +58,15 @@ const PropertyCard = ({ property }) => {
           {/* Render offers as bullet points if it's an array, or split by ◆ if it's a string */}
           {offer && (Array.isArray(offer) ? offer : offer.split('◆').filter(Boolean).map(o => '◆ ' + o.trim())).map((bullet, idx) => (
             <li key={idx} className="flex items-start gap-2">
-              <span className="text-slate-dark font-medium">{bullet}</span>
+              <span className="line-clamp-1 text-slate-dark font-medium">{bullet}</span>
             </li>
           ))}
 
           <li className="flex items-start gap-2 pt-2">
-            <span className="font-semibold text-slate-dark">{bhk}</span>
+            <span className="line-clamp-1 font-semibold text-slate-dark">{bhk}</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="font-bold text-gold text-base">{price}</span>
+            <span className="line-clamp-1 font-bold text-gold text-base">{price}</span>
           </li>
         </ul>
 
