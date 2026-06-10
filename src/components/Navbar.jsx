@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Building2, Menu, X, ChevronDown, MapPin, Building } from 'lucide-react';
+import { Menu, X, ChevronDown, MapPin, Building } from 'lucide-react';
 import { properties } from '../data/properties';
+import logo from '../logo.jpeg';
 
 const Navbar = () => {
   const location = useLocation();
@@ -34,17 +35,16 @@ const Navbar = () => {
 
   return (
     <nav className="sticky top-0 z-40 bg-[#E8EDE8] shadow-sm border-b border-sage-border/60 backdrop-blur-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20">
           {/* Logo Section */}
           <div className="flex-shrink-0 flex items-center">
-            <Link to="/" className="flex items-center gap-2 group">
-              <div className="bg-gold p-2.5 rounded-lg text-white group-hover:bg-gold-dark transition-all duration-300 shadow-md">
-                <Building2 className="w-6 h-6" />
-              </div>
-              <span className="text-xl font-bold text-sage-dark tracking-tight group-hover:text-gold transition-colors duration-300">
-                Directly By Developers
-              </span>
+            <Link to="/" className="flex items-center group" aria-label="Directly By Developers home">
+              <img
+                src={logo}
+                alt="Directly By Developers"
+                className="h-22 w-auto max-w-[400px] sm:max-w-[110px] object-contain"
+              />
             </Link>
           </div>
 
