@@ -70,7 +70,7 @@ class DBDMailer
             // Sender & Recipient addresses
             $fromEmail = $smtp['from_email'] ?? 'connect@directlybydevelopers.com';
             $fromName  = $smtp['from_name'] ?? 'Directly By Developers Lead Desk';
-            $toEmail   = $smtp['to_email'] ?? 'sachinmaurya.work@gmail.com';
+            $toEmail   = $smtp['to_email'] ?? 'connect@directlybydevelopers.com';
 
             $mail->setFrom($fromEmail, $fromName);
             $mail->addAddress($toEmail);
