@@ -130,14 +130,18 @@ const Navbar = () => {
   };
 
   const handleProjectClick = (e, prop) => {
+    if (e) e.stopPropagation();
     const targetUrl = prop.landingUrl || prop.officialUrl;
-    if (targetUrl) {
+    if (targetUrl && targetUrl !== '#') {
       window.open(targetUrl, '_blank', 'noopener,noreferrer');
     } else {
-      e.preventDefault();
+      if (e) e.preventDefault();
       window.dispatchEvent(
         new CustomEvent('openEnquiryModal', {
-          detail: { propertyName: prop.name }
+          detail: { 
+            propertyName: prop.name,
+            location: prop.city || prop.location || ''
+          }
         })
       );
     }
@@ -274,57 +278,38 @@ const Navbar = () => {
                     </span>
                   </div>
 
-                  {/* Projects Grid: 2-column wide cards with full details */}
+                  {/* Projects Grid: Clean, compact list showing ONLY project names */}
                   <div className="flex-1 overflow-y-auto pr-1.5 custom-scrollbar">
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-1.5">
                       {activeCityProperties.length > 0 ? (
                         activeCityProperties.map((prop) => {
                           const hasLanding = Boolean(prop.landingUrl || prop.officialUrl);
 
                           return (
-                            <div
+                            <button
                               key={prop.id}
+                              type="button"
                               onClick={(e) => handleProjectClick(e, prop)}
-                              className="group p-2.5 rounded-xl border border-sage-border/70 hover:border-gold/70 hover:bg-gold/5 transition-all duration-150 cursor-pointer flex flex-col justify-between bg-white hover:shadow-xs"
+                              title={hasLanding ? `Open ${prop.name} Official Page` : `Enquire about ${prop.name}`}
+                              className="group flex items-center justify-between px-3 py-2 rounded-xl border border-sage-border/60 hover:border-gold/70 bg-[#FAFBF9] hover:bg-gold/10 transition-all duration-150 text-left cursor-pointer shadow-xs hover:shadow-sm"
                             >
-                              <div>
-                                <div className="flex items-start justify-between gap-1 mb-0.5">
-                                  <h5 className="text-[11px] font-bold text-[#16281E] group-hover:text-gold-darker transition-colors truncate">
-                                    {prop.name}
-                                  </h5>
-                                  {hasLanding ? (
-                                    <span className="text-[8px] bg-gold/15 text-gold-darker font-bold px-1.5 py-0.5 rounded shrink-0 flex items-center gap-0.5">
-                                      Page <ExternalLink className="w-2 h-2" />
-                                    </span>
-                                  ) : (
-                                    <span className="text-[8px] bg-sage-deep text-sage-dark font-medium px-1 py-0.5 rounded shrink-0">
-                                      Enquire
-                                    </span>
-                                  )}
-                                </div>
-                                <p className="text-[10px] text-sage-muted truncate mb-0.5">
-                                  {prop.developer || 'Leading Developer'}
-                                </p>
-                                {prop.bhk && (
-                                  <p className="text-[9px] text-sage-dark/80 truncate">
-                                    {prop.bhk}
-                                  </p>
-                                )}
-                              </div>
-
-                              <div className="mt-2 pt-1.5 border-t border-sage-border/40 flex items-center justify-between text-[10px]">
-                                <span className="font-bold text-gold-darker">
-                                  {prop.price || 'On Request'}
+                              <span className="text-[11px] lg:text-[12px] font-semibold text-[#16281E] group-hover:text-gold-darker transition-colors truncate pr-1">
+                                {prop.name}
+                              </span>
+                              {hasLanding ? (
+                                <span className="shrink-0 flex items-center gap-0.5 text-[8px] font-bold text-gold bg-gold/10 px-1.5 py-0.5 rounded group-hover:bg-gold group-hover:text-white transition-colors">
+                                  Page <ExternalLink className="w-2.5 h-2.5" />
                                 </span>
-                                <span className="text-[9px] text-sage-muted group-hover:text-gold flex items-center gap-0.5 font-medium">
-                                  {hasLanding ? 'View Details' : 'Enquire Now'} ›
+                              ) : (
+                                <span className="shrink-0 text-[8px] font-bold text-sage-muted bg-sage-deep/60 px-1.5 py-0.5 rounded group-hover:bg-gold group-hover:text-white transition-colors">
+                                  Enquire
                                 </span>
-                              </div>
-                            </div>
+                              )}
+                            </button>
                           );
                         })
                       ) : (
-                        <div className="col-span-2 py-16 text-center text-xs text-sage-muted">
+                        <div className="col-span-full py-16 text-center text-xs text-sage-muted">
                           No active properties found in {hoveredCity}.
                         </div>
                       )}
@@ -672,10 +657,7 @@ const Navbar = () => {
                                 onClick={(e) => handleProjectClick(e, prop)}
                                 className="flex items-center justify-between p-2 rounded-lg bg-white border border-sage-border/50 text-xs cursor-pointer hover:border-gold"
                               >
-                                <div className="truncate pr-2">
-                                  <span className="font-bold text-[#16281E] block truncate">{prop.name}</span>
-                                  <span className="text-[10px] text-sage-muted truncate block">{prop.developer}</span>
-                                </div>
+                                <span className="font-bold text-[#16281E] truncate pr-2">{prop.name}</span>
                                 <span className="text-[10px] font-bold text-gold shrink-0">
                                   {prop.landingUrl || prop.officialUrl ? 'View Page ›' : 'Enquire ›'}
                                 </span>
