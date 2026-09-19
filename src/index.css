@@ -3,15 +3,45 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --deep-green: #0F2A23;
+    --forest-green: #173D33;
+    --gold: #B58A3C;
+    --dark-gold: #9A6F1E;
+    --ivory: #F7F5F0;
+    --warm-white: #FCFBF8;
+    --soft-beige: #EBE6DE;
+    --charcoal: #1B1F1E;
+    --muted-text: #66706B;
+  }
+
   /* Ensure default font families */
   body {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    color: #16281e;
+    font-family: 'Plus Jakarta Sans', 'Manrope', sans-serif;
+    color: #1B1F1E;
+    background-color: #FCFBF8;
   }
-  
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Cormorant Garamond', serif;
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Playfair Display', 'Cormorant Garamond', serif;
   }
+}
+
+.font-cursive {
+  font-family: 'Alex Brush', cursive;
+}
+
+.font-serif-luxury {
+  font-family: 'Playfair Display', 'Cormorant Garamond', serif;
+}
+
+.font-sans-luxury {
+  font-family: 'Plus Jakarta Sans', 'Manrope', sans-serif;
 }
 
 /* Custom Scrollbar Utility */
@@ -19,17 +49,17 @@
   .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
   }
-  
+
   .custom-scrollbar::-webkit-scrollbar-track {
     background: #f1f1f1;
     border-radius: 8px;
   }
-  
+
   .custom-scrollbar::-webkit-scrollbar-thumb {
     background: #DAA520;
     border-radius: 8px;
   }
-  
+
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: #B8860B;
   }
@@ -41,6 +71,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -52,16 +83,409 @@
     opacity: 0;
     transform: translateY(20px) scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
 }
 
+@keyframes slowSpinPulse {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+
+  50% {
+    transform: rotate(180deg) scale(1.3);
+  }
+
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+@keyframes wordReveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom Shimmer Sweep Effect */
+.shimmer-sweep {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-sweep::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.4) 50%,
+      rgba(255, 255, 255, 0) 100%);
+  transform: skewX(-25deg);
+  transition: none;
+  pointer-events: none;
+}
+
+.shimmer-sweep:hover::after {
+  left: 150%;
+  transition: left 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Ken Burns Hover Style */
+.ken-burns-img {
+  transition: transform 3.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease-out;
+}
+
+.ken-burns-container:hover .ken-burns-img {
+  transform: scale(1.06) translate(1.5%, 1%);
+}
+
+/* Shimmer Loading Wave */
+.shimmer-wave {
+  background: linear-gradient(90deg,
+      #FAF6F0 25%,
+      #E8EDE8 37%,
+      #FAF6F0 63%);
+  background-size: 400% 100%;
+  animation: shimmerAnim 1.4s ease infinite;
+}
+
+@keyframes shimmerAnim {
+  0% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Checkmark SVG Draw Animation */
+.checkmark-circle {
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  stroke-width: 2;
+  stroke-miterlimit: 10;
+  stroke: #10b981;
+  /* emerald-500 */
+  fill: none;
+  animation: stroke 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.checkmark {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: block;
+  stroke-width: 2;
+  stroke: #fff;
+  stroke-miterlimit: 10;
+  box-shadow: inset 0px 0px 0px #10b981;
+  animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s forwards;
+}
+
+.checkmark-check {
+  transform-origin: 50% 50%;
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: stroke 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.8s forwards;
+}
+
+@keyframes stroke {
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes scale {
+
+  0%,
+  100% {
+    transform: none;
+  }
+
+  50% {
+    transform: scale3d(1.1, 1.1, 1);
+  }
+}
+
+@keyframes fill {
+  100% {
+    box-shadow: inset 0px 0px 0px 30px #10b981;
+  }
+}
+
 .animate-fadeIn {
-  animation: fadeIn 0.5s ease-out forwards;
+  animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 .animate-slideUp {
-  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-slow-spin-pulse {
+  animation: slowSpinPulse 8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-word-reveal {
+  opacity: 0;
+  animation: wordReveal 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Stagger scroll items */
+.reveal-item {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 800ms cubic-bezier(0.4, 0, 0.2, 1), transform 800ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal-item.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Luxury Hero Banner Animations */
+@keyframes kenBurnsEffect {
+  0% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(1.06);
+  }
+}
+
+.animate-kenburns {
+  animation: kenBurnsEffect 20s ease-in-out infinite alternate;
+  transform-origin: center center;
+}
+
+@keyframes fadeStaggerUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-stagger-1 {
+  opacity: 0;
+  animation: fadeStaggerUp 800ms cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  animation-delay: 100ms;
+}
+
+.animate-fade-stagger-2 {
+  opacity: 0;
+  animation: fadeStaggerUp 800ms cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  animation-delay: 350ms;
+}
+
+.animate-fade-stagger-3 {
+  opacity: 0;
+  animation: fadeStaggerUp 800ms cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  animation-delay: 600ms;
+}
+
+/* Accessibility: Support prefers-reduced-motion by disabling animations */
+@media (prefers-reduced-motion: reduce) {
+  .animate-kenburns {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .animate-fade-stagger-1,
+  .animate-fade-stagger-2,
+  .animate-fade-stagger-3,
+  .animate-word-reveal,
+  .animate-fadeIn,
+  .animate-slideUp,
+  .reveal-item {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .checkmark,
+  .checkmark-circle,
+  .checkmark-check {
+    animation: none !important;
+    stroke-dashoffset: 0 !important;
+    opacity: 1 !important;
+    box-shadow: inset 0px 0px 0px 30px #10b981 !important;
+  }
+}
+
+/* Custom class to force the hero heading to stay on a single line on desktop while wrapping cleanly on mobile with readable sizing */
+.hero-single-line-heading {
+  text-align: center;
+  /* Keep text perfectly centered horizontally */
+  width: 100%;
+  max-width: 100%;
+  font-size: clamp(1.25rem, 5vw, 1.75rem);
+  /* Responsive, readable font size on mobile (20px to 28px) */
+  white-space: normal;
+  /* Allow wrapping on mobile and tablets */
+}
+
+/* Tablet viewports */
+@media (min-width: 640px) {
+  .hero-single-line-heading {
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    /* Responsive tablet font size (28px to 36px) */
+  }
+}
+
+/* Desktop viewports (lg screens and up) */
+@media (min-width: 1024px) {
+  .hero-single-line-heading {
+    white-space: nowrap;
+    /* Prevent heading from wrapping to multiple lines on desktop */
+    font-size: clamp(1.8rem, 2.2vw, 2.25rem);
+    /* Clamp font size: min 1.8rem (28.8px), responsive 2.2vw, max 2.25rem (36px) */
+    overflow: hidden;
+    /* Prevent text overflow outside container boundaries */
+    text-overflow: clip;
+    /* Clean crop fallback for absolute boundary cases */
+  }
+}
+
+/* Builder Partners Continuous Slider */
+@keyframes scrollLogos {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.logo-slider-container {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.logo-slider-track {
+  display: flex;
+  gap: 40px;
+  animation: scrollLogos 30s linear infinite;
+  width: fit-content;
+}
+
+.logo-slider-track:hover {
+  animation-play-state: paused;
+}
+
+.logo-slider-item {
+  flex-shrink: 0;
+  width: 160px;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(207, 217, 207, 0.3);
+  /* subtle border */
+}
+
+.logo-slider-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  border-color: rgba(184, 134, 11, 0.2);
+  /* subtle gold border hover */
+}
+
+.logo-slider-item img {
+  max-width: 80%;
+  max-height: 40px;
+  object-fit: contain;
+}
+
+@media (max-width: 768px) {
+  .logo-slider-track {
+    gap: 20px;
+    animation-duration: 20s;
+  }
+
+  .logo-slider-item {
+    width: 130px;
+    height: 75px;
+    padding: 8px;
+  }
+
+  .logo-slider-item img {
+    max-height: 45px;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo-slider-track {
+    gap: 15px;
+    animation-duration: 15s;
+  }
+
+  .logo-slider-item {
+    width: 110px;
+    height: 65px;
+    padding: 6px;
+  }
+
+  .logo-slider-item img {
+    max-height: 38px;
+  }
+}
+
+/* Ticker Scrolling Animation */
+@keyframes scrollTicker {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-scroll-ticker {
+  display: flex;
+  width: max-content;
+  animation: scrollTicker 55s linear infinite;
+  will-change: transform;
+}
+
+.animate-scroll-ticker:hover {
+  animation-play-state: paused;
+}
+
+.animate-scroll-location-ticker {
+  display: flex;
+  width: max-content;
+  animation: scrollTicker 120s linear infinite;
+  will-change: transform;
+}
+
+.animate-scroll-location-ticker:hover {
+  animation-play-state: paused;
 }

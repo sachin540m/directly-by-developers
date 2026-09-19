@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 215 60" width="215" height="60">
+  <g transform="translate(2, 4)">
+    <path d="M 10 4 L 32 4 L 32 46 L 10 46 Z" fill="#0A2540" />
+    <path d="M 18 12 L 24 12 L 24 38 L 18 38 Z" fill="#D4AF37" />
+    <path d="M 2 25 L 40 25" stroke="#D4AF37" stroke-width="4" />
+  </g>
+  <text x="48" y="35" font-family="'Times New Roman', 'Georgia', serif" font-weight="900" font-size="22" fill="#0A2540" letter-spacing="1">HIRANANDANI</text>
+  <text x="48" y="50" font-family="'Arial', sans-serif" font-weight="800" font-size="10" fill="#B58A3C" letter-spacing="3.5">COMMUNITIES</text>
+</svg>

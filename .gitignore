@@ -25,3 +25,22 @@ dist-ssr/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Environment and Secrets
+.env
+.env.local
+.env.*.local
+api/.env
+api/.env.local
+api/config/config.php
+api/vendor/
+api/logs/*.log
+api/logs/rate_limit_*.json
+
+# SMTP and database backups
+smtp-config.php
+public/smtp-config.php
+leads.csv
+public/leads.csv
+leads.json
+public/leads.json

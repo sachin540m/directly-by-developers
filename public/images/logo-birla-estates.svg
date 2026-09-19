@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 175 60" width="175" height="60">
+  <g transform="translate(2, 4)">
+    <path d="M 16 46 L 26 8 L 36 46 Z" fill="#990000" />
+    <path d="M 6 46 L 24 16 L 30 46 Z" fill="#CC1100" opacity="0.9" />
+    <path d="M 36 46 L 44 16 L 58 46 Z" fill="#D4AF37" />
+  </g>
+  <text x="64" y="32" font-family="'Times New Roman', 'Georgia', serif" font-weight="900" font-size="25" fill="#990000" letter-spacing="1">BIRLA</text>
+  <text x="64" y="50" font-family="'Arial', sans-serif" font-weight="800" font-size="13" fill="#333333" letter-spacing="3">ESTATES</text>
+</svg>

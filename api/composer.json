@@ -1,0 +1,13 @@
+{
+  "name": "directlybydevelopers/api-mailer",
+  "description": "Hostinger SMTP Lead Submission API for Directly By Developers",
+  "type": "project",
+  "require": {
+    "php": ">=7.4",
+    "phpmailer/phpmailer": "^6.9"
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true
+  }
+}

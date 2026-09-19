@@ -19,6 +19,14 @@ export default {
           dark: '#16281E',
           muted: '#4F5D54',
           input: '#FAFFFA',
+        },
+        slate: {
+          deep: '#E8EDE8',
+          card: '#FFFFFF',
+          border: '#CFD9CF',
+          dark: '#16281E',
+          muted: '#4F5D54',
+          input: '#FAFFFA',
         }
       },
       fontFamily: {

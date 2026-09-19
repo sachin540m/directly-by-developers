@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 205 60" width="205" height="60">
+  <g transform="translate(2, 4)">
+    <path d="M 4 44 L 4 6 L 22 28 L 40 6 L 40 44" fill="none" stroke="#D32F2F" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+  <text x="50" y="35" font-family="'Montserrat', sans-serif" font-weight="900" font-size="21" fill="#1A1A1A" letter-spacing="1">MAHAAVIR</text>
+  <text x="50" y="49" font-family="'Montserrat', sans-serif" font-weight="800" font-size="9.5" fill="#D32F2F" letter-spacing="1.5">UNIVERSAL HOMES</text>
+</svg>
