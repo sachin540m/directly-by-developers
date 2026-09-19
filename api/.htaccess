@@ -1,0 +1,15 @@
+# Directly By Developers - API Directory Security
+# Prevent directory listing
+Options -Indexes
+
+# Protect sensitive internal files
+<FilesMatch "(\.env|\.log|config\.php|config\.example\.php|composer\.(json|lock)|\.gitkeep)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Block direct web access to internal folders
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(includes|config|logs)/ - [F,L,NC]
+</IfModule>
