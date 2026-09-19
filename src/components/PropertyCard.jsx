@@ -4,12 +4,16 @@ import { ShieldCheck } from 'lucide-react';
 import SectionDivider from './SectionDivider';
 
 const PropertyCard = ({ property, onEnquire }) => {
-  const { name, developer, location, city, bhk, price, offer, image, slug, officialUrl, landingUrl } = property;
+  const { id, name, developer, location, city, bhk, price, offer, image, slug, officialUrl, landingUrl } = property;
   const hasTargetUrl = Boolean(landingUrl || officialUrl);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const cardAnchorId = `property-${slug || id}`;
 
   return (
-    <div className="bg-slate-card rounded-[18px] shadow-sm border border-gold/15 hover:border-gold/50 overflow-hidden hover:shadow-[0_20px_50px_rgba(184,134,11,0.12)] hover:-translate-y-2 hover:scale-[1.01] transition-all duration-500 flex flex-col h-full group ken-burns-container">
+    <div 
+      id={cardAnchorId}
+      className="bg-slate-card rounded-[18px] shadow-sm border border-gold/15 hover:border-gold/50 overflow-hidden hover:shadow-[0_20px_50px_rgba(184,134,11,0.12)] hover:-translate-y-2 hover:scale-[1.01] transition-all duration-500 flex flex-col h-full group ken-burns-container"
+    >
       {/* Property Image & Badges */}
       <div className="relative aspect-video overflow-hidden bg-slate-deep">
         {/* Skeleton Shimmer */}
