@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 60" width="190" height="60">
-  <g transform="translate(2, 5)">
-    <rect x="2" y="2" width="40" height="40" fill="#000000" rx="4" />
-    <path d="M 12 12 L 12 32 L 30 32" fill="none" stroke="#D4AF37" stroke-width="5.5" stroke-linecap="square" />
-  </g>
-  <text x="52" y="37" font-family="'Times New Roman', 'Georgia', serif" font-weight="900" font-size="28" fill="#000000" letter-spacing="2">LODHA</text>
-  <text x="52" y="50" font-family="'Arial', sans-serif" font-weight="800" font-size="8.5" fill="#D4AF37" letter-spacing="2.5">BUILDING A BETTER LIFE</text>
-</svg>

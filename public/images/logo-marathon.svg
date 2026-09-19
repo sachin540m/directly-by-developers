@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 195 60" width="195" height="60">
-  <g transform="translate(2, 5)">
-    <path d="M 6 44 L 6 8 L 24 34 L 42 8 L 42 44" fill="none" stroke="#E31837" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
-  </g>
-  <text x="52" y="37" font-family="'Arial', sans-serif" font-weight="900" font-size="23" fill="#1F2937" letter-spacing="1">MARATHON</text>
-  <text x="52" y="50" font-family="'Arial', sans-serif" font-weight="800" font-size="10" fill="#E31837" letter-spacing="3.5">REALTY</text>
-</svg>
