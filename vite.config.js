@@ -83,6 +83,9 @@ function copyApiPlugin() {
 }
 
 export default defineConfig({
+  resolve: {
+    preserveSymlinks: true
+  },
   plugins: [react(), phpDevServerPlugin(), copyApiPlugin()],
   // Use relative paths so the built site works in any subdirectory
   // (e.g. /directly/ on XAMPP, or the root on Hostinger)
