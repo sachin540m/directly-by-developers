@@ -11,6 +11,9 @@ declare(strict_types=1);
 // Security constant to authorize internal file includes
 define('DBD_APP_INIT', true);
 
+// Set default timezone to Indian Standard Time (IST)
+date_default_timezone_set('Asia/Kolkata');
+
 // Set default error handling to avoid leaking server paths or errors
 ini_set('display_errors', '0');
 error_reporting(E_ALL);

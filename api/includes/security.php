@@ -157,15 +157,15 @@ class DBDSecurity
         }
         $sanitized['name'] = $cleanName;
 
-        // 2. Phone Number (Required, 10-13 digits)
+        // 2. Phone Number (Required, 7-16 digits to support international numbers)
         $rawPhone = $input['phone'] ?? '';
         $cleanPhone = preg_replace('/[^\d+]/', '', trim((string)$rawPhone));
         $digitsOnly = preg_replace('/\D/', '', $cleanPhone);
 
         if (empty($digitsOnly)) {
             $errors['phone'] = 'Phone number is required.';
-        } elseif (strlen($digitsOnly) < 10 || strlen($digitsOnly) > 13) {
-            $errors['phone'] = 'Please enter a valid 10-digit phone number.';
+        } elseif (strlen($digitsOnly) < 7 || strlen($digitsOnly) > 16) {
+            $errors['phone'] = 'Please enter a valid phone number.';
         }
         $sanitized['phone'] = $cleanPhone;
 
@@ -199,7 +199,8 @@ class DBDSecurity
         $rawUrl = trim((string)($input['currentUrl'] ?? ''));
         $sanitized['currentUrl']   = filter_var($rawUrl, FILTER_SANITIZE_URL);
         $sanitized['pageSource']   = self::sanitizeSingleLine($input['pageSource'] ?? '', 100);
-        $sanitized['submittedAt']  = date('Y-m-d H:i:s T');
+        $istDate = new DateTime('now', new DateTimeZone('Asia/Kolkata'));
+        $sanitized['submittedAt']  = $istDate->format('Y-m-d h:i:s A \I\S\T');
         $sanitized['clientIp']     = self::getClientIp();
         $sanitized['userAgent']    = self::sanitizeSingleLine($_SERVER['HTTP_USER_AGENT'] ?? 'Unknown', 255);
 
