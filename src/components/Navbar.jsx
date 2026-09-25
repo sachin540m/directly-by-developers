@@ -282,21 +282,21 @@ const Navbar = () => {
             {/* Mega Dropdown: 1 Vertical Column of Cities on Left, Direct Projects Panel on Right */}
             {activeCategory === 'residential' && (
               <div 
-                className="absolute top-[100%] right-0 lg:right-4 xl:right-8 w-[950px] max-w-[96vw] h-[455px] bg-white rounded-2xl shadow-2xl border border-gold/30 z-50 flex overflow-hidden animate-fadeIn origin-top"
+                className="absolute top-[100%] right-0 lg:right-4 xl:right-8 w-[960px] max-w-[96vw] h-[385px] max-h-[calc(100vh-100px)] bg-white rounded-2xl shadow-2xl border border-gold/30 z-50 flex overflow-hidden animate-fadeIn origin-top"
                 onMouseEnter={() => handleCategoryMouseEnter('residential')}
                 onMouseLeave={handleCategoryMouseLeave}
               >
-                {/* LEFT SIDE: Single Clean Column of All Locations / Corridors - ALL 14 VISIBLE AT A GLANCE (NO SCROLL) */}
-                <div className="w-[230px] shrink-0 bg-[#F4F6F4] border-r border-sage-border/60 p-2 flex flex-col justify-between select-none">
+                {/* LEFT SIDE: 2 Balanced Columns of All 16 Locations - ALL 16 VISIBLE IN ONE VIEW (NO SCROLL, NO CUTOFF) */}
+                <div className="w-[315px] lg:w-[335px] shrink-0 bg-[#F4F6F4] border-r border-sage-border/60 p-2.5 flex flex-col justify-between select-none">
                   <div>
-                    <div className="px-2 py-1 mb-1 border-b border-sage-border/50 flex items-center justify-between">
+                    <div className="px-1.5 py-1 mb-1.5 border-b border-sage-border/50 flex items-center justify-between">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-sage-muted flex items-center gap-1">
                         <MapPin className="w-3 h-3 text-gold" /> Locations ({RESIDENTIAL_CITIES.length}):
                       </span>
                     </div>
 
-                    {/* Single Vertical Stack: Clean, fitted list with NO scrollbar */}
-                    <div className="space-y-[3px]">
+                    {/* 2-Column Grid: 8 rows each, perfectly fills the height with zero overflow */}
+                    <div className="grid grid-cols-2 grid-flow-col grid-rows-8 gap-x-1.5 gap-y-1">
                       {RESIDENTIAL_CITIES.map((city) => {
                         const count = getPropertiesByCity(city).length;
                         const isHovered = hoveredCity.toLowerCase() === city.toLowerCase();
@@ -307,20 +307,20 @@ const Navbar = () => {
                             type="button"
                             onMouseEnter={() => handleCityMouseEnter(city)}
                             onClick={() => handleCityClick(city)}
-                            className={`w-full flex items-center justify-between px-2.5 py-[4px] rounded-lg text-xs font-semibold transition-colors duration-100 text-left cursor-pointer ${
+                            className={`w-full flex items-center justify-between px-2 py-1 rounded-lg text-xs font-semibold transition-colors duration-100 text-left cursor-pointer ${
                               isHovered
                                 ? 'bg-gold text-white font-bold shadow-xs'
                                 : 'text-sage-dark hover:bg-gold/15 hover:text-gold-darker'
                             }`}
                           >
-                            <span className="truncate pr-1 text-[11px]">{city}</span>
+                            <span className="truncate pr-1 text-[10.5px] lg:text-[11px]">{city}</span>
                             <div className="flex items-center gap-1 shrink-0">
-                              <span className={`text-[9px] px-1.5 py-0.1 rounded-full font-bold ${
+                              <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold leading-none ${
                                 isHovered ? 'bg-white/25 text-white' : 'bg-gold/15 text-gold-darker'
                               }`}>
                                 {count}
                               </span>
-                              <ChevronRight className={`w-3 h-3 ${isHovered ? 'text-white' : 'text-sage-muted/70'}`} />
+                              <ChevronRight className={`w-2.5 h-2.5 ${isHovered ? 'text-white' : 'text-sage-muted/70'}`} />
                             </div>
                           </button>
                         );
@@ -328,7 +328,7 @@ const Navbar = () => {
                     </div>
                   </div>
 
-                  <div className="px-2 pt-1 border-t border-sage-border/50 text-[10px] text-sage-muted truncate shrink-0">
+                  <div className="px-1.5 pt-1.5 border-t border-sage-border/50 text-[10px] text-sage-muted truncate shrink-0">
                     <span>Direct Developer Desk</span>
                   </div>
                 </div>
@@ -430,7 +430,7 @@ const Navbar = () => {
 
             {activeCategory === 'commercial' && (
               <div 
-                className="absolute top-[100%] right-0 lg:right-4 xl:right-8 w-[950px] max-w-[96vw] h-[455px] bg-white rounded-2xl shadow-2xl border border-gold/30 z-50 flex overflow-hidden animate-fadeIn origin-top"
+                className="absolute top-[100%] right-0 lg:right-4 xl:right-8 w-[960px] max-w-[96vw] h-[385px] max-h-[calc(100vh-100px)] bg-white rounded-2xl shadow-2xl border border-gold/30 z-50 flex overflow-hidden animate-fadeIn origin-top"
                 onMouseEnter={() => handleCategoryMouseEnter('commercial')}
                 onMouseLeave={handleCategoryMouseLeave}
               >
