@@ -15,30 +15,65 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { properties } from '../data/properties';
+import { commercialProperties, COMMERCIAL_CITIES } from '../data/commercialProperties';
 
 const logo = `${import.meta.env.BASE_URL}directly-by-developer-logo.webp`;
 
 const LOCATIONS = [
-  "PALM BEACH", "VASHI", "SANPADA", "JUINAGAR", "NERUL", "SEAWOODS",
+  "PALM BEACH ROAD", "THANE-BELAPUR ROAD", "VASHI", "SANPADA", "JUINAGAR", "NERUL", "SEAWOODS",
   "BELAPUR", "KHARGHAR", "UPPER KHARGHAR", "MANSAROVAR",
   "KHANDESHWAR", "KAMOTHE", "KALAMBOLI", "PANVEL", "NEW PANVEL",
   "KARANJADE", "ULWE", "PUSHPAK NAGAR", "DRONAGIRI", "TURBHE",
   "KOPARKHAIRANE", "GHANSOLI", "RABALE", "AIROLI", "TALOJA"
 ];
 
-// The 13 actual cities ordered by prominence
+// Verified projects directly on or within 1-2 minutes of Palm Beach Road
+const PALM_BEACH_ROAD_IDS = [
+  '9-pbr-adani',
+  'sai-palm-view',
+  'delta-palm-beach-seawoods',
+  'palm-amore-seawoods',
+  'sai-green-gold',
+  'platinum-oakwoods-seawoods',
+  'pioneer-the-view',
+  'godrej-eternal-palms',
+  'godrej-bayview',
+  'arihant-advika',
+  'sun-view-heights-vashi',
+  'metricon-gateway-vashi'
+];
+
+// Verified projects directly on or within 1-2 minutes of Thane-Belapur Road
+const THANE_BELAPUR_ROAD_IDS = [
+  'sai-world-one',
+  'aurum-q-islands-ghansoli',
+  'raheja-lunaris',
+  'raheja-jade-city',
+  'raheja-wtc',
+  'raheja-atlantis',
+  'today-citadil-juinagar',
+  'delta-tricity-airoli',
+  'birla-taranya-airoli',
+  'eden-garden-airoli',
+  'delta-new-palm-beach-airoli'
+];
+
+// The actual micro-markets & corridors ordered by prominence
 const RESIDENTIAL_CITIES = [
   'Kharghar', 
   'Panvel', 
+  'Palm Beach Road',
+  'Thane-Belapur Road',
   'Juinagar',
   'Nerul', 
   'Vashi', 
   'Airoli', 
   'Seawoods', 
   'Taloja', 
-  'Palm Beach',
   'Belapur', 
   'Sanpada', 
+  'Kopar Khairane',
+  'Ulwe',
   'Ghansoli', 
   'Roadpali'
 ];
@@ -76,17 +111,24 @@ const Navbar = () => {
     return () => { document.body.style.overflow = ''; };
   }, [mobileMenuOpen]);
 
-  // Helper to fetch properties for a given city
+  // Helper to fetch properties for a given city or corridor
   const getPropertiesByCity = (cityName) => {
-    const c = cityName.toLowerCase();
-    if (c === 'palm beach') {
-      return properties.filter((p) =>
-        (p.location && p.location.toLowerCase().includes('palm beach')) ||
-        (p.name && p.name.toLowerCase().includes('palm beach')) ||
-        (p.city && p.city.toLowerCase() === 'palm beach')
-      );
+    const c = (cityName || '').toLowerCase().trim();
+    if (c === 'palm beach road' || c === 'palm beach') {
+      const propMap = new Map(properties.map((p) => [p.id, p]));
+      return PALM_BEACH_ROAD_IDS.map((id) => propMap.get(id)).filter(Boolean);
     }
-    return properties.filter((p) => p.city && p.city.toLowerCase() === c);
+    if (c === 'thane-belapur road' || c === 'thane belapur road' || c === 'thane-belapur' || c === 'thane belapur') {
+      const propMap = new Map(properties.map((p) => [p.id, p]));
+      return THANE_BELAPUR_ROAD_IDS.map((id) => propMap.get(id)).filter(Boolean);
+    }
+    if (c === 'kopar khairane' || c === 'koper khairane' || c === 'koparkhairane') {
+      return properties.filter((p) => {
+        const pc = (p.city || '').toLowerCase().trim();
+        return pc === 'kopar khairane' || pc === 'koper khairane' || pc === 'koparkhairane';
+      });
+    }
+    return properties.filter((p) => (p.city || '').toLowerCase().trim() === c);
   };
 
   const handleCategoryMouseEnter = (cat) => {
@@ -161,6 +203,47 @@ const Navbar = () => {
 
   const activeCityProperties = getPropertiesByCity(hoveredCity);
 
+  // Commercial Mega-Dropdown state & helpers
+  const [hoveredCommercialCity, setHoveredCommercialCity] = useState('Vashi');
+  const commercialCityHoverTimeout = useRef(null);
+
+  const getCommercialPropertiesByCity = (cityName) => {
+    const c = (cityName || '').toLowerCase().trim();
+    return commercialProperties.filter((p) => (p.city || '').toLowerCase().trim() === c);
+  };
+
+  const handleCommercialCityMouseEnter = (city) => {
+    if (commercialCityHoverTimeout.current) {
+      clearTimeout(commercialCityHoverTimeout.current);
+    }
+    commercialCityHoverTimeout.current = setTimeout(() => {
+      setHoveredCommercialCity(city);
+    }, 90);
+  };
+
+  const handleCommercialCityClick = (city) => {
+    if (commercialCityHoverTimeout.current) {
+      clearTimeout(commercialCityHoverTimeout.current);
+    }
+    setHoveredCommercialCity(city);
+  };
+
+  const handleCommercialProjectClick = (e, prop) => {
+    if (e) e.stopPropagation();
+    window.dispatchEvent(
+      new CustomEvent('openEnquiryModal', {
+        detail: {
+          propertyName: prop.name,
+          location: prop.city || prop.location || ''
+        }
+      })
+    );
+    setActiveCategory(null);
+    setMobileMenuOpen(false);
+  };
+
+  const activeCommercialCityProperties = getCommercialPropertiesByCity(hoveredCommercialCity);
+
   return (
     <nav id="site-navbar" className="w-full shrink-0 bg-[#E8EDE8] border-b border-[#CFD9CF]/80 z-40 transition-all duration-300">
       
@@ -206,21 +289,21 @@ const Navbar = () => {
             {/* Mega Dropdown: 1 Vertical Column of Cities on Left, Direct Projects Panel on Right */}
             {activeCategory === 'residential' && (
               <div 
-                className="absolute top-[100%] right-0 lg:right-4 xl:right-8 w-[950px] max-w-[96vw] h-[390px] bg-white rounded-2xl shadow-2xl border border-gold/30 z-50 flex overflow-hidden animate-fadeIn origin-top"
+                className="absolute top-[100%] right-0 lg:right-4 xl:right-8 w-[950px] max-w-[96vw] h-[455px] bg-white rounded-2xl shadow-2xl border border-gold/30 z-50 flex overflow-hidden animate-fadeIn origin-top"
                 onMouseEnter={() => handleCategoryMouseEnter('residential')}
                 onMouseLeave={handleCategoryMouseLeave}
               >
-                {/* LEFT SIDE: Single Clean Column of All 13 Cities (NO other city in between!) */}
-                <div className="w-[210px] shrink-0 bg-[#F4F6F4] border-r border-sage-border/60 p-2 flex flex-col justify-between select-none">
+                {/* LEFT SIDE: Single Clean Column of All Locations / Corridors - ALL 14 VISIBLE AT A GLANCE (NO SCROLL) */}
+                <div className="w-[230px] shrink-0 bg-[#F4F6F4] border-r border-sage-border/60 p-2 flex flex-col justify-between select-none">
                   <div>
                     <div className="px-2 py-1 mb-1 border-b border-sage-border/50 flex items-center justify-between">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-sage-muted flex items-center gap-1">
-                        <MapPin className="w-3 h-3 text-gold" /> Cities ({RESIDENTIAL_CITIES.length}):
+                        <MapPin className="w-3 h-3 text-gold" /> Locations ({RESIDENTIAL_CITIES.length}):
                       </span>
                     </div>
 
-                    {/* Single Vertical Stack: Moving right from any city goes directly into projects! */}
-                    <div className="space-y-0.5">
+                    {/* Single Vertical Stack: Clean, fitted list with NO scrollbar */}
+                    <div className="space-y-[3px]">
                       {RESIDENTIAL_CITIES.map((city) => {
                         const count = getPropertiesByCity(city).length;
                         const isHovered = hoveredCity.toLowerCase() === city.toLowerCase();
@@ -231,14 +314,14 @@ const Navbar = () => {
                             type="button"
                             onMouseEnter={() => handleCityMouseEnter(city)}
                             onClick={() => handleCityClick(city)}
-                            className={`w-full flex items-center justify-between px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors duration-100 text-left cursor-pointer ${
+                            className={`w-full flex items-center justify-between px-2.5 py-[4px] rounded-lg text-xs font-semibold transition-colors duration-100 text-left cursor-pointer ${
                               isHovered
                                 ? 'bg-gold text-white font-bold shadow-xs'
                                 : 'text-sage-dark hover:bg-gold/15 hover:text-gold-darker'
                             }`}
                           >
                             <span className="truncate pr-1 text-[11px]">{city}</span>
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-1 shrink-0">
                               <span className={`text-[9px] px-1.5 py-0.1 rounded-full font-bold ${
                                 isHovered ? 'bg-white/25 text-white' : 'bg-gold/15 text-gold-darker'
                               }`}>
@@ -252,21 +335,21 @@ const Navbar = () => {
                     </div>
                   </div>
 
-                  <div className="px-2 pt-1.5 border-t border-sage-border/50 text-[10px] text-sage-muted truncate">
+                  <div className="px-2 pt-1 border-t border-sage-border/50 text-[10px] text-sage-muted truncate shrink-0">
                     <span>Direct Developer Desk</span>
                   </div>
                 </div>
 
-                {/* RIGHT SIDE: Dedicated Projects Canvas for the Hovered City */}
+                {/* RIGHT SIDE: Dedicated Projects Canvas for the Hovered City / Corridor */}
                 <div 
                   className="flex-1 p-3.5 bg-white flex flex-col min-w-0"
                   onMouseEnter={handleProjectsAreaMouseEnter}
                 >
-                  {/* City Header */}
+                  {/* City / Corridor Header */}
                   <div className="flex items-center justify-between pb-2 border-b border-sage-border/50 mb-2.5">
                     <div>
                       <h4 className="text-sm font-bold text-[#16281E] flex items-center gap-1.5">
-                        <span>Projects in {hoveredCity}</span>
+                        <span>Projects {hoveredCity.toLowerCase().includes('road') ? 'along' : 'in'} {hoveredCity}</span>
                         <span className="text-[11px] font-bold text-gold-darker">
                           ({activeCityProperties.length} Verified Developer Homes)
                         </span>
@@ -310,7 +393,7 @@ const Navbar = () => {
                         })
                       ) : (
                         <div className="col-span-full py-16 text-center text-xs text-sage-muted">
-                          No active properties found in {hoveredCity}.
+                          No active properties found {hoveredCity.toLowerCase().includes('road') ? 'along' : 'in'} {hoveredCity}.
                         </div>
                       )}
                     </div>
@@ -333,7 +416,7 @@ const Navbar = () => {
 
           {/* 2. COMMERCIAL CATEGORY (Showcase Dropdown) */}
           <div 
-            className="h-full flex items-center py-3 relative"
+            className="h-full flex items-center py-3"
             onMouseEnter={() => handleCategoryMouseEnter('commercial')}
             onMouseLeave={handleCategoryMouseLeave}
           >
@@ -354,49 +437,121 @@ const Navbar = () => {
 
             {activeCategory === 'commercial' && (
               <div 
-                className="absolute top-[100%] right-0 lg:right-auto lg:left-1/2 lg:-translate-x-1/2 w-[360px] bg-white rounded-2xl shadow-2xl border border-gold/30 p-4 z-50 animate-fadeIn"
+                className="absolute top-[100%] right-0 lg:right-4 xl:right-8 w-[950px] max-w-[96vw] h-[455px] bg-white rounded-2xl shadow-2xl border border-gold/30 z-50 flex overflow-hidden animate-fadeIn origin-top"
                 onMouseEnter={() => handleCategoryMouseEnter('commercial')}
                 onMouseLeave={handleCategoryMouseLeave}
               >
-                <div className="flex items-center gap-2.5 mb-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-gold/15 text-gold flex items-center justify-center shrink-0">
-                    <Briefcase className="w-4 h-4" />
-                  </div>
+                {/* LEFT SIDE: Commercial Hubs Single Column */}
+                <div className="w-[230px] shrink-0 bg-[#F4F6F4] border-r border-sage-border/60 p-2 flex flex-col justify-between select-none">
                   <div>
-                    <h4 className="text-xs font-bold text-[#16281E] uppercase tracking-wide">Commercial Spaces</h4>
-                    <span className="text-[9px] bg-amber-100 text-amber-900 font-bold px-1.5 py-0.5 rounded">
-                      Direct Developer Opportunities
+                    <div className="px-2 py-1 mb-1 border-b border-sage-border/50 flex items-center justify-between">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-sage-muted flex items-center gap-1">
+                        <Briefcase className="w-3 h-3 text-gold" /> Commercial Hubs ({COMMERCIAL_CITIES.length}):
+                      </span>
+                    </div>
+
+                    <div className="space-y-[3px]">
+                      {COMMERCIAL_CITIES.map((city) => {
+                        const count = getCommercialPropertiesByCity(city).length;
+                        const isHovered = hoveredCommercialCity.toLowerCase() === city.toLowerCase();
+
+                        return (
+                          <button
+                            key={city}
+                            type="button"
+                            onMouseEnter={() => handleCommercialCityMouseEnter(city)}
+                            onClick={() => handleCommercialCityClick(city)}
+                            className={`w-full flex items-center justify-between px-2.5 py-[5px] rounded-lg text-xs font-semibold transition-colors duration-100 text-left cursor-pointer ${
+                              isHovered
+                                ? 'bg-gold text-white font-bold shadow-xs'
+                                : 'text-sage-dark hover:bg-gold/15 hover:text-gold-darker'
+                            }`}
+                          >
+                            <span className="truncate pr-1 text-[11px]">{city}</span>
+                            <div className="flex items-center gap-1 shrink-0">
+                              <span className={`text-[9px] px-1.5 py-0.1 rounded-full font-bold ${
+                                isHovered ? 'bg-white/25 text-white' : 'bg-gold/15 text-gold-darker'
+                              }`}>
+                                {count}
+                              </span>
+                              <ChevronRight className={`w-3 h-3 ${isHovered ? 'text-white' : 'text-sage-muted/70'}`} />
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="px-2 pt-1 border-t border-sage-border/50 text-[10px] text-sage-muted truncate shrink-0">
+                    <span>Direct Commercial Desk</span>
+                  </div>
+                </div>
+
+                {/* RIGHT SIDE: Dedicated Commercial Projects Canvas */}
+                <div 
+                  className="flex-1 p-3.5 bg-white flex flex-col min-w-0"
+                  onMouseEnter={() => {
+                    if (commercialCityHoverTimeout.current) {
+                      clearTimeout(commercialCityHoverTimeout.current);
+                      commercialCityHoverTimeout.current = null;
+                    }
+                  }}
+                >
+                  {/* City Header */}
+                  <div className="flex items-center justify-between pb-2 border-b border-sage-border/50 mb-2.5">
+                    <div>
+                      <h4 className="text-sm font-bold text-[#16281E] flex items-center gap-1.5">
+                        <span>Commercial Projects in {hoveredCommercialCity}</span>
+                        <span className="text-[11px] font-bold text-gold-darker">
+                          ({activeCommercialCityProperties.length} Verified Spaces)
+                        </span>
+                      </h4>
+                      <p className="text-[10px] text-sage-muted">100% Direct Rates • Zero Brokerage • Grade-A Commercial</p>
+                    </div>
+                    <span className="text-[9px] bg-emerald-50 text-emerald-700 font-semibold px-2 py-0.5 rounded-full border border-emerald-200">
+                      Direct Developer
                     </span>
                   </div>
+
+                  {/* Commercial Projects Grid: Clean 3-column compact grid like Residential (Image 2) */}
+                  <div className="flex-1 overflow-y-auto pr-1.5 custom-scrollbar">
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-1.5">
+                      {activeCommercialCityProperties.length > 0 ? (
+                        activeCommercialCityProperties.map((prop) => (
+                          <button
+                            key={prop.id}
+                            type="button"
+                            onClick={(e) => handleCommercialProjectClick(e, prop)}
+                            title={`Enquire about ${prop.name}`}
+                            className="group flex items-center justify-between px-3 py-2 rounded-xl border border-sage-border/60 hover:border-gold/70 bg-[#FAFBF9] hover:bg-gold/10 transition-all duration-150 text-left cursor-pointer shadow-xs hover:shadow-sm"
+                          >
+                            <span className="text-[11px] lg:text-[12px] font-semibold text-[#16281E] group-hover:text-gold-darker transition-colors truncate pr-1">
+                              {prop.name}
+                            </span>
+                            <span className="shrink-0 text-[8px] font-bold text-sage-muted bg-sage-deep/60 px-1.5 py-0.5 rounded group-hover:bg-gold group-hover:text-white transition-colors">
+                              Enquire
+                            </span>
+                          </button>
+                        ))
+                      ) : (
+                        <div className="col-span-full py-16 text-center text-xs text-sage-muted">
+                          No commercial projects found in {hoveredCommercialCity}.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Footer callout */}
+                  <div className="pt-2 mt-1 border-t border-sage-border/40 flex items-center justify-between text-[10px] text-sage-muted">
+                    <span>Need price sheets or floor plans?</span>
+                    <a 
+                      href="tel:+917718853773"
+                      className="text-gold font-bold hover:underline flex items-center gap-0.5"
+                    >
+                      <Phone className="w-2.5 h-2.5" /> Call Developer Desk: +91 7718853773
+                    </a>
+                  </div>
                 </div>
-
-                <p className="text-[11px] text-sage-muted mb-3 leading-relaxed">
-                  Explore Grade-A IT Parks, corporate boutique offices, high-street retail shops, and commercial showrooms across Vashi, Nerul & Belapur.
-                </p>
-
-                <div className="space-y-1 mb-3.5 text-[11px] text-sage-dark">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-gold shrink-0" />
-                    <span>Prime Commercial Hubs & Metro Connectivity</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-gold shrink-0" />
-                    <span>High Rental Yields & Pre-Leased Options</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-gold shrink-0" />
-                    <span>Zero Brokerage Direct Developer Rates</span>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => handleShowcaseEnquire('Commercial Spaces')}
-                  className="w-full bg-gold hover:bg-gold-light text-white text-xs font-bold py-2 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <span>Enquire For Commercial</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
               </div>
             )}
           </div>
@@ -672,22 +827,74 @@ const Navbar = () => {
               )}
             </div>
 
-            {/* 2. Commercial Mobile Button */}
-            <div className="bg-white rounded-2xl border border-sage-border/70 p-3.5 flex items-center justify-between shadow-xs">
-              <div className="flex items-center gap-2.5">
-                <Briefcase className="w-4 h-4 text-[#B58A3C]" />
-                <div>
-                  <h4 className="text-xs font-bold text-[#16281E] uppercase">Commercial</h4>
-                  <p className="text-[10px] text-sage-muted">Offices, Retail & IT Parks</p>
-                </div>
-              </div>
+            {/* 2. Commercial Mobile Accordion */}
+            <div className="bg-white rounded-2xl border border-sage-border/70 overflow-hidden shadow-xs">
               <button
                 type="button"
-                onClick={() => handleShowcaseEnquire('Commercial Spaces')}
-                className="bg-gold text-white text-[11px] font-bold px-3 py-1.5 rounded-lg shadow-xs"
+                onClick={() => setMobileExpandedCat(mobileExpandedCat === 'commercial' ? null : 'commercial')}
+                className="w-full flex items-center justify-between p-3.5 text-left font-bold text-[#16281E] text-sm uppercase cursor-pointer"
               >
-                Enquire
+                <span className="flex items-center gap-2">
+                  <Briefcase className="w-4 h-4 text-[#B58A3C]" />
+                  <span>Commercial Spaces</span>
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] bg-gold/15 text-gold-darker font-bold px-2 py-0.5 rounded-full">
+                    {commercialProperties.length} Hubs
+                  </span>
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${mobileExpandedCat === 'commercial' ? 'rotate-180 text-gold' : 'text-sage-muted'}`} />
+                </div>
               </button>
+
+              {mobileExpandedCat === 'commercial' && (
+                <div className="p-3 pt-0 space-y-2 border-t border-sage-border/50 bg-[#F4F6F4]">
+                  {COMMERCIAL_CITIES.map((city) => {
+                    const cityProps = getCommercialPropertiesByCity(city);
+                    const isCityOpen = mobileExpandedCity === `comm-${city}`;
+
+                    return (
+                      <div key={city} className="bg-white rounded-xl border border-sage-border/50 overflow-hidden">
+                        <button
+                          type="button"
+                          onClick={() => setMobileExpandedCity(isCityOpen ? null : `comm-${city}`)}
+                          className="w-full flex items-center justify-between px-3 py-2 text-xs font-bold text-sage-dark text-left cursor-pointer"
+                        >
+                          <span className="flex items-center gap-1.5">
+                            <MapPin className="w-3.5 h-3.5 text-gold" />
+                            <span>{city}</span>
+                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] bg-gold/15 text-gold-darker font-bold px-1.5 py-0.5 rounded-full">
+                              {cityProps.length}
+                            </span>
+                            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isCityOpen ? 'rotate-180 text-gold' : 'text-sage-muted'}`} />
+                          </div>
+                        </button>
+
+                        {isCityOpen && (
+                          <div className="p-2 pt-0 space-y-1.5 bg-sage-deep/10 border-t border-sage-border/40">
+                            {cityProps.map((prop) => (
+                              <div
+                                key={prop.id}
+                                onClick={(e) => handleCommercialProjectClick(e, prop)}
+                                className="flex items-center justify-between p-2 rounded-lg bg-white border border-sage-border/50 text-xs cursor-pointer hover:border-gold"
+                              >
+                                <div>
+                                  <span className="font-bold text-[#16281E] block leading-tight">{prop.name}</span>
+                                  <span className="text-[10px] text-gold font-semibold">{prop.price} • {prop.carpetArea}</span>
+                                </div>
+                                <span className="text-[10px] font-bold text-gold shrink-0">
+                                  Enquire ›
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* 3. Plots Mobile Button */}

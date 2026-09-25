@@ -808,7 +808,7 @@ export const properties = [
     "bhk": "Sky Villa 2, 3 & 4 BHK Residences",
     "price": "₹ 90 Lacs* Onwards",
     "offer": "",
-    "image": "godrej-city-panvel/images/banner/banner1.webp",
+    "image": "godrej-city-panvel/images/banner/deskban1.webp",
     "slug": "godrej-city-panvel",
     "description": "Godrej City Panvel is an expansive 106-acre integrated township offering 2, 3 & 4 BHK Sky Villas with a 9-hole golf course, grand clubhouses, and forest hill views near Mumbai-Pune Expressway.",
     "amenities": [
@@ -897,7 +897,7 @@ export const properties = [
     "bhk": "Modern 1 & 2 BHK Residences",
     "price": "₹ 79 Lacs* Onwards",
     "offer": "",
-    "image": "embassy-park-panvel/images/banner/banner1.webp",
+    "image": "embassy-park-panvel/images/banner/deskban1.webp",
     "slug": "embassy-park-panvel",
     "description": "Embassy Park in Panvel offers thoughtfully crafted 1 & 2 BHK homes set amidst lush greenery, with lifestyle amenities, clean air, scenic mountain views, and quick access to Panvel Junction.",
     "amenities": [
@@ -956,7 +956,7 @@ export const properties = [
     "bhk": "The Grandé Collection 3 & 4 BHK",
     "price": "₹ 1.98 Cr* Onwards",
     "offer": "",
-    "image": "lt-panvel/images/banner/banner1.webp",
+    "image": "lt-panvel/images/banner/banner2.webp",
     "slug": "lt-panvel",
     "description": "L&T Crestoria Panvel features The Grandé Collection of 3 & 4 BHK residences designed by L&T Realty, with international clubhouse amenities, panoramic forest hill views, and fast airport connectivity.",
     "amenities": [
@@ -1625,6 +1625,126 @@ export const properties = [
     ],
     "reraNumber": "P51700049811",
     "possession": "Dec 2027",
+    "landingUrl": "",
+    "officialUrl": ""
+  },
+  {
+    "id": "progressive-era-koparkhairane",
+    "name": "Progressive Era",
+    "developer": "Progressive Group",
+    "location": "Plot No.76, Sec-11, Kopar Khairane, Navi Mumbai",
+    "city": "Kopar Khairane",
+    "bhk": "Palatial 4.5 BHK Residences (1601 sq.ft.)",
+    "price": "₹ 4 Cr. Onwards",
+    "offer": "",
+    "image": "images/residential/Era-koparkhairne.jpg",
+    "slug": "progressive-era-koparkhairane",
+    "description": "Progressive Era at Sector 11 Kopar Khairane offers exclusive 4.5 BHK residences with single-flat-per-floor privacy, 12.5 ft floor-to-ceiling height, G+15 structure, ready OC possession and elite amenities.",
+    "amenities": [
+      "Ready Possession with OC",
+      "Single Flat Per Floor (Privacy)",
+      "12.5 Ft Floor-to-Ceiling Height",
+      "3 Dedicated Car Parkings",
+      "Grand Entrance Lobby",
+      "2 High-Speed Elevators",
+      "24/7 Multi-Tier Security"
+    ],
+    "floorPlans": [
+      "4.5 BHK - 1601 Sq.Ft. Carpet"
+    ],
+    "reraNumber": "P51700028711",
+    "possession": "Ready to Move (OC Received)",
+    "landingUrl": "",
+    "officialUrl": ""
+  },
+  {
+    "id": "progressive-one-vashi",
+    "name": "Progressive One",
+    "developer": "Progressive Group",
+    "location": "Plot No.29A, Sec-4, Opp. NMSA, Vashi, Navi Mumbai",
+    "city": "Vashi",
+    "bhk": "Ultra-Luxury 4.5 BHK Residences (2095 sq.ft.)",
+    "price": "₹ 11 Cr. Onwards",
+    "offer": "",
+    "image": "images/residential/Progressive-One-Vashi-Banner-1.webp",
+    "slug": "progressive-one-vashi",
+    "description": "Progressive One is an iconic G+21 luxury tower in Sector 4 Vashi opposite NMSA, presenting 4.5 BHK bespoke residences (1 flat per floor), 11-14 ft ceiling height, ready sample flat, and panoramic views.",
+    "amenities": [
+      "Opposite NMSA Sports Club",
+      "Exclusive 1 Flat Per Floor",
+      "11 to 14 Ft Ceiling Heights",
+      "3 Dedicated Car Parkings / Unit",
+      "3 High-Speed Elevators",
+      "Lavish Clubhouse & Sky Amenities",
+      "Ready Sample Flat Available"
+    ],
+    "floorPlans": [
+      "4.5 BHK - 2095 Sq.Ft. Carpet"
+    ],
+    "reraNumber": "P51700030142",
+    "possession": "Mar 2027 (85% Completed)",
+    "landingUrl": "",
+    "officialUrl": ""
+  },
+  {
+    "id": "progressive-aum-vashi",
+    "name": "Progressive Aum",
+    "developer": "Progressive Group",
+    "location": "Plot No.32 & 33, Sec-16, Opp. Modern College, Vashi, Navi Mumbai",
+    "city": "Vashi",
+    "bhk": "4.5 BHK Palatial Residences (1860 - 2012 sq.ft.)",
+    "price": "₹ 9 Cr. Onwards",
+    "offer": "",
+    "image": "images/residential/Aum-vashi.webp",
+    "slug": "progressive-aum-vashi",
+    "description": "Progressive Aum at Sector 16 Vashi presents majestic 4.5 BHK residences across a G+20 tower, featuring 13 to 14.9 ft ceiling heights, 3 parking slots per unit, only 3 flats per floor, and world-class leisure facilities.",
+    "amenities": [
+      "Prime Sector 16 Vashi Location",
+      "13 to 14.9 Ft Grand Ceiling Heights",
+      "3 Luxury Flats Per Floor",
+      "3 Dedicated Car Parkings / Unit",
+      "3 High-Speed Passenger & Service Lifts",
+      "Swimming Pool & Wellness Zone",
+      "Ready Sample Flat Available"
+    ],
+    "floorPlans": [
+      "4.5 BHK - 1860 Sq.Ft.",
+      "4.5 BHK - 1960 Sq.Ft.",
+      "4.5 BHK - 2012 Sq.Ft."
+    ],
+    "reraNumber": "P51700031855",
+    "possession": "Dec 2027 (30% Completed)",
+    "landingUrl": "",
+    "officialUrl": ""
+  },
+  {
+    "id": "progressive-aura-ulwe",
+    "name": "Progressive Aura",
+    "developer": "Progressive Group",
+    "location": "Plot No.1, Sec-3, Opp. Coastal Road, Ulwe, Navi Mumbai",
+    "city": "Ulwe",
+    "bhk": "3, 3.5 & 4.5 BHK Coastal Residences",
+    "price": "₹ 2.5 Cr. Onwards",
+    "offer": "",
+    "image": "images/residential/Aura-ulwe.jpg",
+    "slug": "progressive-aura-ulwe",
+    "description": "Progressive Aura is an expansive 5700 sq.mtr grand residential enclave in Sector 3 Ulwe opposite Coastal Road, offering 3, 3.5 & 4.5 BHK residences across 3 wings (G+14) with direct Atal Setu & airport connectivity.",
+    "amenities": [
+      "Direct Coastal Road & Atal Setu Access",
+      "Sprawling 5,700 Sq.Mtr. Land Parcel",
+      "G+14 Iconic Elevation Across 3 Wings",
+      "9 High-Speed Elevators (3 Per Wing)",
+      "2 Dedicated Car Parkings / Unit",
+      "Clubhouse, Pool & Children Play Park",
+      "Close to Proposed Navi Mumbai Airport"
+    ],
+    "floorPlans": [
+      "3 BHK - 1005 Sq.Ft. Carpet",
+      "3.5 BHK - 1480 Sq.Ft. Carpet",
+      "4.5 BHK - 2480 Sq.Ft. Carpet"
+    ],
+    "reraNumber": "P52000045210",
+    "possession": "Dec 2028 (Plinth Stage)",
     "landingUrl": "",
     "officialUrl": ""
   }

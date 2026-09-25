@@ -123,5 +123,102 @@ export const developers = [
     id: 'arihant',
     name: 'Arihant Superstructures',
     logo: `${base}images/logo-arihant.jpeg`
+  },
+
+  // 19 New Partner Developers
+  {
+    id: 'tata',
+    name: 'Tata Housing',
+    logo: `${base}images/logo-tata-housing.png`
+  },
+  {
+    id: 'bhagwati',
+    name: 'Bhagwati Group',
+    logo: `${base}images/logo-bhagwati-group.webp`
+  },
+  {
+    id: 'metro-group',
+    name: 'Metro Group',
+    logo: `${base}images/logo-metro-group.png`
+  },
+  {
+    id: 'ellora',
+    name: 'Ellora Group',
+    logo: `${base}images/logo-ellora-group.png`
+  },
+  {
+    id: 'domus',
+    name: 'The Domus',
+    logo: `${base}images/logo-domus-group.png`
+  },
+  {
+    id: 'platinum',
+    name: 'Platinum Group',
+    logo: `${base}images/logo-platinum-group.png`
+  },
+  {
+    id: 'progressive',
+    name: 'Progressive Group',
+    logo: `${base}images/logo-progressive-group.png`
+  },
+  {
+    id: 'shreeji',
+    name: 'Shreeji Ventures',
+    logo: `${base}images/logo-shreeji-ventures.png`
+  },
+  {
+    id: 'dosti',
+    name: 'Dosti Realty',
+    logo: `${base}images/logo-dosti-realty.png`
+  },
+  {
+    id: 'priyanka',
+    name: 'Priyanka Group',
+    logo: `${base}images/logo-priyanka-group.png`
+  },
+  {
+    id: 'sai-developers',
+    name: 'Sai Developers',
+    logo: `${base}images/logo-sai-developers.png`
+  },
+  {
+    id: 'delta',
+    name: 'Delta Group',
+    logo: `${base}images/logo-delta-group.png`
+  },
+  {
+    id: 'aurum',
+    name: 'Aurum Ventures',
+    logo: `${base}images/logo-aurum-ventures.png`
+  },
+  {
+    id: 'tescon',
+    name: 'Tescon Group',
+    logo: `${base}images/logo-tescon-group.png`
+  },
+  {
+    id: 'greenscape',
+    name: 'Greenscape Group',
+    logo: `${base}images/logo-greenscape-group.png`
+  },
+  {
+    id: 'goodwill',
+    name: 'Goodwill Developers',
+    logo: `${base}images/logo-goodwill-developers.png`
+  },
+  {
+    id: 'kolte-patil',
+    name: 'Kolte-Patil Developers',
+    logo: `${base}images/logo-kolte-patil.png`
+  },
+  {
+    id: 'ev-homes',
+    name: 'EV Homes',
+    logo: `${base}images/logo-ev-homes.png`
+  },
+  {
+    id: 'moraj',
+    name: 'Moraj Group',
+    logo: `${base}images/logo-moraj-group.png`
   }
 ];

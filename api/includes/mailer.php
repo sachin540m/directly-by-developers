@@ -70,7 +70,7 @@ class DBDMailer
             // Sender & Recipient addresses
             $fromEmail = $smtp['from_email'] ?? 'connect@directlybydevelopers.com';
             $fromName  = $smtp['from_name'] ?? 'Directly By Developers Lead Desk';
-            $toEmail   = $smtp['to_email'] ?? 'connect@directlybydevelopers.com';
+            $toEmail   = $smtp['to_email'] ?? 'sachinmaurya.work@gmail.com';
 
             $mail->setFrom($fromEmail, $fromName);
             $mail->addAddress($toEmail);
@@ -135,7 +135,7 @@ class DBDMailer
         $region = !empty($lead['region']) ? htmlspecialchars($lead['region'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') : null;
         $visitDay = !empty($lead['visitDay']) ? htmlspecialchars($lead['visitDay'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') : null;
         $message = !empty($lead['message']) ? nl2br(htmlspecialchars($lead['message'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')) : 'No additional message provided.';
-        $submittedAt = htmlspecialchars($lead['submittedAt'] ?? date('Y-m-d H:i:s T'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $submittedAt = htmlspecialchars($lead['submittedAt'] ?? (new DateTime('now', new DateTimeZone('Asia/Kolkata')))->format('Y-m-d h:i:s A \I\S\T'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
         $currentUrl = !empty($lead['currentUrl']) ? htmlspecialchars($lead['currentUrl'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') : 'Direct Access';
         $clientIp = htmlspecialchars($lead['clientIp'] ?? 'Unknown', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 
@@ -245,7 +245,7 @@ HTML;
         $region = $lead['region'] ?? 'N/A';
         $visitDay = $lead['visitDay'] ?? 'N/A';
         $message = $lead['message'] ?? 'N/A';
-        $submittedAt = $lead['submittedAt'] ?? date('Y-m-d H:i:s T');
+        $submittedAt = $lead['submittedAt'] ?? (new DateTime('now', new DateTimeZone('Asia/Kolkata')))->format('Y-m-d h:i:s A \I\S\T');
         $currentUrl = $lead['currentUrl'] ?? 'N/A';
         $clientIp = $lead['clientIp'] ?? 'Unknown';
 

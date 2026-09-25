@@ -1,13 +1,36 @@
 import React, { useEffect, useState } from 'react';
-import { X } from 'lucide-react';
+import { X, ChevronDown } from 'lucide-react';
+import CountryCodeDropdown from './CountryCodeDropdown';
 import { submitLead } from '../utils/submitLead';
 import { properties } from '../data/properties';
+import { commercialProperties } from '../data/commercialProperties';
+import { DEFAULT_COUNTRY_CODE, validatePhoneNumber, getCountryByCode } from '../data/countryCodes';
 
-const LOCATION_CITIES = ['Kharghar', 'Panvel', 'Nerul', 'Seawoods', 'Vashi', 'Airoli', 'Taloja', 'Juinagar', 'Belapur', 'Sanpada', 'Ghansoli', 'Roadpali'];
+export const LOCATION_CITIES = [
+  'Kharghar', 
+  'Panvel', 
+  'Nerul', 
+  'Seawoods', 
+  'Vashi', 
+  'Airoli', 
+  'Taloja', 
+  'Juinagar', 
+  'Belapur', 
+  'Sanpada', 
+  'Kopar Khairane',
+  'Ulwe',
+  'Ghansoli', 
+  'Turbhe', 
+  'Mahape', 
+  'Digha', 
+  'Roadpali'
+];
+
+const allProperties = [...properties, ...commercialProperties];
 
 const getShortCity = (loc, propName) => {
   if (propName) {
-    const propByName = properties.find(
+    const propByName = allProperties.find(
       (p) => p.name.toLowerCase() === propName.toLowerCase()
     );
     if (propByName && propByName.city) {
@@ -15,29 +38,39 @@ const getShortCity = (loc, propName) => {
         (c) => c.toLowerCase() === propByName.city.toLowerCase()
       );
       if (matched) return matched;
+      return propByName.city;
     }
   }
 
   if (loc) {
+    const locLower = loc.toLowerCase().replace(/[-_]/g, ' ').trim();
+    if (locLower === 'koparkhairane' || locLower === 'koper khairane' || locLower === 'koperkhairane' || locLower === 'kopar khairne' || locLower === 'koper khairne') {
+      return 'Kopar Khairane';
+    }
+
     const directMatch = LOCATION_CITIES.find(
       (c) => c.toLowerCase() === loc.toLowerCase()
     );
     if (directMatch) return directMatch;
 
-    const propByLoc = properties.find(
-      (p) => p.location.toLowerCase() === loc.toLowerCase() || p.city.toLowerCase() === loc.toLowerCase()
+    const propByLoc = allProperties.find(
+      (p) => (p.location && p.location.toLowerCase() === loc.toLowerCase()) || 
+             (p.city && p.city.toLowerCase() === loc.toLowerCase())
     );
     if (propByLoc && propByLoc.city) {
       const matched = LOCATION_CITIES.find(
         (c) => c.toLowerCase() === propByLoc.city.toLowerCase()
       );
       if (matched) return matched;
+      return propByLoc.city;
     }
 
     const subMatch = LOCATION_CITIES.find((c) =>
       loc.toLowerCase().includes(c.toLowerCase())
     );
     if (subMatch) return subMatch;
+
+    return loc;
   }
 
   return '';
@@ -46,6 +79,7 @@ const getShortCity = (loc, propName) => {
 const EnquiryModal = ({ isOpen, onClose, propertyName, location }) => {
   const [formData, setFormData] = useState({
     name: '',
+    countryCode: DEFAULT_COUNTRY_CODE,
     phone: '',
     email: '',
     message: `Interested in ${propertyName}. Please share brochure and pricing details.`,
@@ -60,6 +94,7 @@ const EnquiryModal = ({ isOpen, onClose, propertyName, location }) => {
     if (isOpen) {
       setFormData({
         name: '',
+        countryCode: DEFAULT_COUNTRY_CODE,
         phone: '',
         email: '',
         message: `Interested in ${propertyName}. Please share brochure and pricing details.`,
@@ -84,6 +119,7 @@ const EnquiryModal = ({ isOpen, onClose, propertyName, location }) => {
       }
     }
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (error) setError('');
   };
 
   const handleMessageKeyDown = (e) => {
@@ -107,11 +143,13 @@ const EnquiryModal = ({ isOpen, onClose, propertyName, location }) => {
       setError('Full Name is required.');
       return;
     }
-    const phoneRegex = /^[0-9]{10}$/;
-    if (!phoneRegex.test(formData.phone.trim())) {
-      setError('Please enter a valid 10-digit phone number.');
+
+    const phoneResult = validatePhoneNumber(formData.phone, formData.countryCode);
+    if (!phoneResult.isValid) {
+      setError(phoneResult.errorMsg);
       return;
     }
+
     if (!formData.location) {
       setError('Please select a location.');
       return;
@@ -119,12 +157,14 @@ const EnquiryModal = ({ isOpen, onClose, propertyName, location }) => {
     setError('');
     setIsSubmitting(true);
 
+    const fullPhone = phoneResult.fullNumber;
+
     submitLead({
       formType: "Modal Enquiry Form",
       propertyName: propertyName,
       region: formData.location,
       name: formData.name,
-      phone: formData.phone,
+      phone: fullPhone,
       email: formData.email,
       message: formData.message
     })
@@ -203,6 +243,9 @@ const EnquiryModal = ({ isOpen, onClose, propertyName, location }) => {
                   required
                 >
                   <option value="">Select a location</option>
+                  {formData.location && !LOCATION_CITIES.includes(formData.location) && (
+                    <option value={formData.location}>{formData.location}</option>
+                  )}
                   {LOCATION_CITIES.map((city) => (
                     <option key={city} value={city}>
                       {city}
@@ -230,16 +273,26 @@ const EnquiryModal = ({ isOpen, onClose, propertyName, location }) => {
                 <label className="block text-[11px] font-semibold text-slate-dark uppercase tracking-wider mb-0.5">
                   Phone Number <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  placeholder="E.g. 7718853773"
-                  maxLength="10"
-                  className="w-full px-3 py-1.5 rounded-lg bg-slate-input border border-slate-border/80 text-xs text-slate-dark focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all duration-300"
-                  required
-                />
+                <div className="flex items-center gap-1.5">
+                  <CountryCodeDropdown
+                    value={formData.countryCode}
+                    onChange={(code) => {
+                      setFormData((prev) => ({ ...prev, countryCode: code }));
+                      if (error) setError('');
+                    }}
+                    placement="bottom"
+                    buttonClassName="py-1.5 px-2 rounded-lg bg-slate-input border-slate-border/80 text-xs"
+                  />
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder={formData.countryCode === '+91' ? '10-digit number' : `e.g. ${getCountryByCode(formData.countryCode).example}`}
+                    className="flex-1 px-3 py-1.5 rounded-lg bg-slate-input border border-slate-border/80 text-xs text-slate-dark focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all duration-300"
+                    required
+                  />
+                </div>
               </div>
 
               <div>

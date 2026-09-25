@@ -5,7 +5,8 @@
  * developer projects exist in properties.js.
  */
 
-import { properties } from '../data/properties';
+import { properties } from '../data/properties.js';
+import { commercialProperties } from '../data/commercialProperties.js';
 
 export const ACTUAL_PROJECT_LOCATIONS = [
   {
@@ -17,8 +18,16 @@ export const ACTUAL_PROJECT_LOCATIONS = [
     aliases: ['seawoods', 'seawods', 'see woods', 'seawood', 'seewoods', 'seawud', 'seawoodss', 'siwoods', 'seaview seawoods']
   },
   {
-    name: 'Palm Beach',
-    aliases: ['palm beach', 'palmbeach', 'palm beach road', 'plam beach', 'palmbech', 'pbr', 'palme beach', 'palm beech']
+    name: 'Palm Beach Road',
+    aliases: ['palm beach road', 'palm beach', 'palmbeach', 'plam beach', 'palmbech', 'pbr', 'palme beach', 'palm beech']
+  },
+  {
+    name: 'Thane-Belapur Road',
+    aliases: [
+      'thane-belapur road', 'thane belapur road', 'thanebelapur road',
+      'thane belapur', 'thane-belapur', 'thanebelapur',
+      'tb road', 'tb-road', 'belapur road', 'thane belapur rd'
+    ]
   },
   {
     name: 'Panvel',
@@ -53,6 +62,21 @@ export const ACTUAL_PROJECT_LOCATIONS = [
     aliases: ['sanpada', 'sampada', 'sanpada station', 'sanpadha']
   },
   {
+    name: 'Kopar Khairane',
+    aliases: [
+      'kopar khairane', 'koper khairane', 'koparkhairane', 'koperkhairane',
+      'kopar khairne', 'koper khairne', 'koparkhairne', 'kopar kherane',
+      'koper kherane', 'kopar station', 'koparkhairane station'
+    ]
+  },
+  {
+    name: 'Ulwe',
+    aliases: [
+      'ulwe', 'ulwa', 'ulve', 'ulway', 'ulwe node', 'coastal road ulwe',
+      'bamandongri', 'kharkopar', 'ulwe sector'
+    ]
+  },
+  {
     name: 'Ghansoli',
     aliases: ['ghansoli', 'gansoli', 'ghansoly', 'ghansoli station', 'ghansoli west']
   },
@@ -64,6 +88,37 @@ export const ACTUAL_PROJECT_LOCATIONS = [
 
 // Flat array of valid city names that actually have properties
 export const VALID_CITIES = ACTUAL_PROJECT_LOCATIONS.map(l => l.name);
+
+// Verified projects directly on or within 1-2 minutes of Palm Beach Road
+export const PALM_BEACH_ROAD_IDS = [
+  '9-pbr-adani',
+  'sai-palm-view',
+  'delta-palm-beach-seawoods',
+  'palm-amore-seawoods',
+  'sai-green-gold',
+  'platinum-oakwoods-seawoods',
+  'pioneer-the-view',
+  'godrej-eternal-palms',
+  'godrej-bayview',
+  'arihant-advika',
+  'sun-view-heights-vashi',
+  'metricon-gateway-vashi'
+];
+
+// Verified projects directly on or within 1-2 minutes of Thane-Belapur Road
+export const THANE_BELAPUR_ROAD_IDS = [
+  'sai-world-one',
+  'aurum-q-islands-ghansoli',
+  'raheja-lunaris',
+  'raheja-jade-city',
+  'raheja-wtc',
+  'raheja-atlantis',
+  'today-citadil-juinagar',
+  'delta-tricity-airoli',
+  'birla-taranya-airoli',
+  'eden-garden-airoli',
+  'delta-new-palm-beach-airoli'
+];
 
 /**
  * Standard Levenshtein distance algorithm for fuzzy typo detection
@@ -90,10 +145,15 @@ export function levenshteinDistance(a, b) {
 }
 
 /**
- * Normalizes input: removes punctuation, trims, lowercases
+ * Normalizes input: removes punctuation, trims, lowercases, maps hyphens to spaces
  */
 export function cleanText(text) {
-  return (text || '').toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
+  return (text || '')
+    .toLowerCase()
+    .replace(/[-_]/g, ' ')
+    .replace(/[^a-z0-9\s]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 /**
@@ -114,15 +174,15 @@ export function findMatchedLocation(input) {
   // 1. Direct exact match against official name or aliases
   for (const loc of ACTUAL_PROJECT_LOCATIONS) {
     if (loc.name.toLowerCase() === raw) return loc.name;
-    if (loc.aliases.includes(raw)) return loc.name;
+    if (loc.aliases.some(a => cleanText(a) === raw || a.toLowerCase() === raw)) return loc.name;
   }
 
   // 2. Whole word match
   for (const loc of ACTUAL_PROJECT_LOCATIONS) {
     for (const alias of loc.aliases) {
       if (alias.length >= 3) {
-        const wordRegex = new RegExp(`\\b${alias}\\b`, 'i');
-        if (wordRegex.test(raw)) {
+        const wordRegex = new RegExp(`\\b${alias.replace(/[-_]/g, '[-_\\s]?')}\\b`, 'i');
+        if (wordRegex.test(input) || wordRegex.test(raw)) {
           return loc.name;
         }
       }
@@ -132,8 +192,8 @@ export function findMatchedLocation(input) {
   // 3. Prefix match (>= 3 chars)
   if (raw.length >= 3) {
     for (const loc of ACTUAL_PROJECT_LOCATIONS) {
-      if (loc.name.toLowerCase().startsWith(raw)) return loc.name;
-      if (loc.aliases.some(a => a.startsWith(raw))) return loc.name;
+      if (cleanText(loc.name).startsWith(raw)) return loc.name;
+      if (loc.aliases.some(a => cleanText(a).startsWith(raw))) return loc.name;
     }
   }
 
@@ -144,7 +204,8 @@ export function findMatchedLocation(input) {
 
     for (const loc of ACTUAL_PROJECT_LOCATIONS) {
       for (const alias of loc.aliases) {
-        const dist = levenshteinDistance(raw, alias);
+        const cleanAlias = cleanText(alias);
+        const dist = levenshteinDistance(raw, cleanAlias);
         const maxAllowed = raw.length <= 5 ? 1 : 2;
         if (dist <= maxAllowed && dist < minDistance) {
           minDistance = dist;
@@ -170,22 +231,35 @@ export function findMatchedLocation(input) {
 export function getProjectsForLocation(locationName, max = 50) {
   if (!locationName) return [];
   const c = cleanText(locationName);
+  const rawLower = (locationName || '').toLowerCase().trim();
+
+  const isPbr = 
+    c.includes('palm beach') || 
+    c.includes('palmbeach') || 
+    c === 'pbr' || 
+    rawLower.includes('palm beach');
+
+  const isTbr = 
+    c.includes('thane belapur') || 
+    c.includes('thanebelapur') || 
+    c.includes('tb road') || 
+    rawLower.includes('thane-belapur') ||
+    rawLower.includes('thane belapur');
+
+  if (isPbr) {
+    const map = new Map(properties.map((p) => [p.id, p]));
+    return PALM_BEACH_ROAD_IDS.map((id) => map.get(id)).filter(Boolean).map((p) => p.name).slice(0, max);
+  }
+
+  if (isTbr) {
+    const map = new Map(properties.map((p) => [p.id, p]));
+    return THANE_BELAPUR_ROAD_IDS.map((id) => map.get(id)).filter(Boolean).map((p) => p.name).slice(0, max);
+  }
 
   const matched = properties.filter((p) => {
     const pCity = cleanText(p.city || '');
     const pLoc = cleanText(p.location || '');
     const pName = cleanText(p.name || '');
-
-    if (c === 'palm beach' || c === 'palmbeach' || c === 'palm beach road') {
-      return (
-        pLoc.includes('palm beach') ||
-        pName.includes('palm beach') ||
-        pName.includes('pbr') ||
-        pCity === 'seawoods' ||
-        pCity === 'nerul'
-      );
-    }
-
     return pCity === c || pLoc.includes(c) || pName.includes(c);
   });
 
@@ -247,3 +321,143 @@ export function getPropertyDetails(projectName) {
   }
   return null;
 }
+
+// ==========================================
+// COMMERCIAL LOCATIONS & MATCHING LOGIC
+// ==========================================
+
+export const ACTUAL_COMMERCIAL_LOCATIONS = [
+  {
+    name: 'Vashi',
+    aliases: ['vashi', 'sector 30a', 'vashi station', 'vashi midc', 'washi']
+  },
+  {
+    name: 'Turbhe',
+    aliases: ['turbhe', 'turbhe midc', 'turbe', 'turbhe station', 'turbhe commercial']
+  },
+  {
+    name: 'Nerul',
+    aliases: ['nerul', 'nerul midc', 'nerul station', 'nerol']
+  },
+  {
+    name: 'Juinagar',
+    aliases: ['juinagar', 'juinagr', 'juinagar station', 'sion panvel highway juinagar']
+  },
+  {
+    name: 'Airoli',
+    aliases: ['airoli', 'airoly', 'airoli station', 'thane belapur airoli']
+  },
+  {
+    name: 'Mahape',
+    aliases: ['mahape', 'mbp', 'millennium business park', 'mahape midc', 'millenium']
+  },
+  {
+    name: 'Digha',
+    aliases: ['digha', 'digha station', 'bkc 2', 'bkc2', 'bkc 2 digha']
+  },
+  {
+    name: 'Rabale',
+    aliases: ['rabale', 'rabale midc', 'rabale station']
+  },
+  {
+    name: 'Koparkhairane',
+    aliases: ['koparkhairane', 'koperkhairne', 'koparkhairane midc', 'koperkhairane', 'koper khairane']
+  }
+];
+
+export const VALID_COMMERCIAL_CITIES = ACTUAL_COMMERCIAL_LOCATIONS.map((l) => l.name);
+
+/**
+ * Smartly evaluates user input string to find if it maps to a commercial hub
+ */
+export function findMatchedCommercialLocation(input) {
+  const raw = cleanText(input);
+  if (!raw || raw.length < 2) return null;
+
+  for (const loc of ACTUAL_COMMERCIAL_LOCATIONS) {
+    if (loc.name.toLowerCase() === raw) return loc.name;
+    if (loc.aliases.some((a) => cleanText(a) === raw || a.toLowerCase() === raw)) return loc.name;
+  }
+
+  for (const loc of ACTUAL_COMMERCIAL_LOCATIONS) {
+    for (const alias of loc.aliases) {
+      if (alias.length >= 3) {
+        const wordRegex = new RegExp(`\\b${alias.replace(/[-_]/g, '[-_\\s]?')}\\b`, 'i');
+        if (wordRegex.test(input) || wordRegex.test(raw)) {
+          return loc.name;
+        }
+      }
+    }
+  }
+
+  if (raw.length >= 3) {
+    for (const loc of ACTUAL_COMMERCIAL_LOCATIONS) {
+      if (cleanText(loc.name).startsWith(raw)) return loc.name;
+      if (loc.aliases.some((a) => cleanText(a).startsWith(raw))) return loc.name;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Returns commercial projects for a given location
+ */
+export function getCommercialProjectsForLocation(locationName, max = 50) {
+  if (!locationName) return [];
+  const c = cleanText(locationName);
+
+  const matched = commercialProperties.filter((p) => {
+    const pCity = cleanText(p.city || '');
+    const pLoc = cleanText(p.location || '');
+    const pName = cleanText(p.name || '');
+    return pCity === c || pLoc.includes(c) || pName.includes(c);
+  });
+
+  const unique = Array.from(new Set(matched.map((p) => p.name)));
+  return unique.slice(0, max);
+}
+
+/**
+ * Checks if user input matches a commercial project name
+ */
+export function findMatchedCommercialProject(input, locationName = null) {
+  if (!input) return null;
+  const cleanInput = cleanText(input);
+  if (!cleanInput || cleanInput.length < 3) return null;
+
+  const candidateList = locationName
+    ? [
+        ...commercialProperties.filter(
+          (p) => cleanText(p.city) === cleanText(locationName) || cleanText(p.location).includes(cleanText(locationName))
+        ),
+        ...commercialProperties
+      ]
+    : commercialProperties;
+
+  for (const p of candidateList) {
+    const pNameClean = cleanText(p.name);
+    if (pNameClean === cleanInput) return p.name;
+    if (cleanInput.includes(pNameClean) || pNameClean.includes(cleanInput)) return p.name;
+  }
+
+  return null;
+}
+
+/**
+ * Retrieves commercial property details
+ */
+export function getCommercialPropertyDetails(projectName) {
+  if (!projectName) return null;
+  const cleanInput = cleanText(projectName);
+  if (!cleanInput) return null;
+
+  for (const p of commercialProperties) {
+    if (cleanText(p.name) === cleanInput) return p;
+  }
+  for (const p of commercialProperties) {
+    if (cleanText(p.name).includes(cleanInput) || cleanInput.includes(cleanText(p.name))) return p;
+  }
+  return null;
+}
+

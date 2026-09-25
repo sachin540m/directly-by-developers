@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { Send, User, Phone as PhoneIcon, MapPin, Calendar, MessageSquare } from 'lucide-react';
+import { Send, User, Phone as PhoneIcon, MapPin, Calendar, MessageSquare, ChevronDown } from 'lucide-react';
 import SectionDivider from './SectionDivider';
+import CountryCodeDropdown from './CountryCodeDropdown';
 import { submitLead } from '../utils/submitLead';
+import { DEFAULT_COUNTRY_CODE, validatePhoneNumber, getCountryByCode } from '../data/countryCodes';
 
 const ContactFAQSection = () => {
   const [formData, setFormData] = useState({
     name: '',
+    countryCode: DEFAULT_COUNTRY_CODE,
     phone: '',
     visitDay: 'This Weekend',
     region: 'Kharghar',
@@ -58,12 +61,13 @@ const ContactFAQSection = () => {
   ];
 
   const toggleFAQ = (index) => {
-    setActiveIndex(activeIndex === index ? null : index);
+    setActiveIndex(activeIndex === index ? -1 : index);
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (error) setError('');
   };
 
   const handleSubmit = (e) => {
@@ -76,18 +80,22 @@ const ContactFAQSection = () => {
       setError('Please enter a valid name.');
       return;
     }
-    const phoneRegex = /^[0-9]{10}$/;
-    if (!phoneRegex.test(formData.phone.trim())) {
-      setError('Please enter a valid 10-digit phone number.');
+
+    const phoneResult = validatePhoneNumber(formData.phone, formData.countryCode);
+    if (!phoneResult.isValid) {
+      setError(phoneResult.errorMsg);
       return;
     }
+
     setError('');
     setIsAnimating(true);
+
+    const fullPhone = phoneResult.fullNumber;
 
     submitLead({
       formType: "Contact FAQ Page Form",
       name: formData.name,
-      phone: formData.phone,
+      phone: fullPhone,
       visitDay: formData.visitDay,
       region: formData.region,
       message: formData.message
@@ -109,6 +117,7 @@ const ContactFAQSection = () => {
   const resetForm = () => {
     setFormData({
       name: '',
+      countryCode: DEFAULT_COUNTRY_CODE,
       phone: '',
       visitDay: 'This Weekend',
       region: 'Kharghar',
@@ -183,23 +192,36 @@ const ContactFAQSection = () => {
                     </div>
                   </div>
 
-                  {/* Phone Input */}
+                  {/* Phone Input with Country Code Selector */}
                   <div>
                     <label className="block text-xs font-bold text-[#16281E] mb-1.5">
                       Phone Number *
                     </label>
-                    <div className="relative flex items-center">
-                      <PhoneIcon className="absolute left-3.5 w-4 h-4 text-gold/80" />
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        placeholder="10-digit mobile number"
-                        maxLength="10"
-                        className="w-full pl-10 pr-4 py-3 rounded-lg bg-white border border-gold/20 focus:outline-none focus:ring-2 focus:ring-gold/40 text-sm text-[#16281E] transition-all duration-300"
-                        required
+                    <div className="flex items-center gap-2">
+                      {/* Country Code Dropdown */}
+                      <CountryCodeDropdown
+                        value={formData.countryCode}
+                        onChange={(code) => {
+                          setFormData((prev) => ({ ...prev, countryCode: code }));
+                          if (error) setError('');
+                        }}
+                        placement="bottom"
+                        buttonClassName="py-3 px-2.5 rounded-lg bg-white border-gold/20 shadow-xs text-xs"
                       />
+
+                      {/* Phone Input */}
+                      <div className="relative flex-1 flex items-center">
+                        <PhoneIcon className="absolute left-3.5 w-4 h-4 text-gold/80" />
+                        <input
+                          type="tel"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                          placeholder={formData.countryCode === '+91' ? '10-digit mobile number' : `e.g. ${getCountryByCode(formData.countryCode).example}`}
+                          className="w-full pl-10 pr-4 py-3 rounded-lg bg-white border border-gold/20 focus:outline-none focus:ring-2 focus:ring-gold/40 text-sm text-[#16281E] transition-all duration-300 shadow-xs"
+                          required
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -292,7 +314,7 @@ const ContactFAQSection = () => {
                   <div>
                     <h4 className="text-lg font-bold text-[#16281E]">Advisor Requested Successfully!</h4>
                     <p className="text-xs text-sage-muted mt-2 max-w-xs mx-auto">
-                      Thank you, <strong className="text-gold">{formData.name}</strong>. Our official developer relationship advisor will contact you on <strong className="text-gold">+91 {formData.phone}</strong> shortly.
+                      Thank you, <strong className="text-gold">{formData.name}</strong>. Our developer team will contact you on <strong className="text-gold">{formData.countryCode} {formData.phone}</strong> shortly.
                     </p>
                   </div>
 

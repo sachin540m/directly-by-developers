@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Send, X, User, Sparkles, MapPin, Building2 } from 'lucide-react';
+import { Send, X, User, Sparkles, MapPin, Building2, Briefcase, ChevronDown } from 'lucide-react';
 import { CHAT_CONFIG } from '../data/chatbotConfig';
 import { submitLead } from '../utils/submitLead';
 import { 
@@ -7,8 +7,15 @@ import {
   VALID_CITIES,
   getProjectsForLocation,
   findMatchedProject,
-  getPropertyDetails
+  getPropertyDetails,
+  VALID_COMMERCIAL_CITIES,
+  findMatchedCommercialLocation,
+  getCommercialProjectsForLocation,
+  findMatchedCommercialProject,
+  getCommercialPropertyDetails
 } from '../utils/locationMatcher';
+import { DEFAULT_COUNTRY_CODE, validatePhoneNumber, getCountryByCode } from '../data/countryCodes';
+import CountryCodeDropdown from './CountryCodeDropdown';
 
 // Helper to retrieve saved session lead data
 const getSavedLead = () => {
@@ -57,39 +64,41 @@ const isValidFullName = (text) => {
   return true;
 };
 
-// Helper to extract 10-digit mobile number from input text (handles spaces, hyphens, +91, 0)
-const parsePhoneNumber = (text) => {
-  const cleanDigits = text.replace(/[\s\-\+\(\)]/g, '');
-  const phoneRegex = /^[0-9]{10}$/;
-  
-  if (phoneRegex.test(cleanDigits)) return cleanDigits;
-  if (cleanDigits.length === 12 && cleanDigits.startsWith('91')) return cleanDigits.substring(2);
-  if (cleanDigits.length === 11 && cleanDigits.startsWith('0')) return cleanDigits.substring(1);
-  
-  return null;
-};
-
 const AIChatbot = ({ isOpen, onClose }) => {
   const savedLead = useMemo(() => getSavedLead(), []);
 
-  // Initial message: Clean greeting with the 13 actual cities that have property cards!
+  // Category state ('residential' | 'commercial')
+  const [leadCategory, setLeadCategory] = useState(null);
+  const leadCategoryRef = useRef(leadCategory);
+  useEffect(() => {
+    leadCategoryRef.current = leadCategory;
+  }, [leadCategory]);
+
+  // Initial message: Category prompt first (Residential vs Commercial)
   const [messages, setMessages] = useState([
     { 
       sender: 'bot', 
       text: savedLead?.phone 
-        ? `Welcome back! 👋 I'm Sonakshi from Directly By Developers.\n\nWhich location in Navi Mumbai would you like to explore? Tap your preferred city below:`
-        : `Hello 👋 I'm Sonakshi. Welcome to Directly By Developers!\n\nWhich location in Navi Mumbai are you looking for? Tap your preferred city below:`, 
+        ? `Welcome back! 👋 I'm Sonakshi from Directly By Developers.\n\nWhat type of property are you exploring today?`
+        : `Hello 👋 I'm Sonakshi. Welcome to Directly By Developers!\n\nAre you looking for Residential homes or Commercial office/retail spaces? Tap your preference below:`, 
       time: new Date(),
-      type: 'location_chips',
-      chips: VALID_CITIES
+      type: 'category_chips',
+      chips: ['🏡 Residential Homes', '🏢 Commercial Spaces']
     }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
 
   // Lead collection state machine:
-  // 'awaiting_location' | 'awaiting_project' | 'awaiting_name' | 'awaiting_number' | 'completed'
-  const [leadState, setLeadState] = useState(savedLead?.phone ? 'completed' : 'awaiting_location');
+  // 'awaiting_category' | 'awaiting_location' | 'awaiting_project' | 'awaiting_commercial_location' | 'awaiting_commercial_project' | 'awaiting_name' | 'awaiting_number' | 'completed'
+  const [leadState, setLeadState] = useState(savedLead?.phone ? 'completed' : 'awaiting_category');
+  const [selectedCountryCode, setSelectedCountryCode] = useState(DEFAULT_COUNTRY_CODE);
+  const selectedCountryCodeRef = useRef(selectedCountryCode);
+
+  useEffect(() => {
+    selectedCountryCodeRef.current = selectedCountryCode;
+  }, [selectedCountryCode]);
+
   const [leadData, setLeadData] = useState({ 
     location: '', 
     propertyName: '', 
@@ -178,22 +187,23 @@ const AIChatbot = ({ isOpen, onClose }) => {
         const customerName = leadDataRef.current.name ? `${leadDataRef.current.name}` : '';
         const nameGreeting = customerName ? `${customerName}, ` : '';
         const regPhone = leadDataRef.current.phone;
+        const formattedPhone = regPhone.startsWith('+') ? regPhone : `+91 ${regPhone}`;
 
         // Quietly update CRM enquiry for newly shortlisted project
         submitLead({
           formType: "AI Chatbot - Additional Shortlist",
           leadType: "AI Chatbot Lead",
           name: leadDataRef.current.name || 'Chatbot User',
-          phone: regPhone,
+          phone: formattedPhone,
           location: cityName,
           region: cityName,
           propertyName: selectedProp,
-          message: `Additional Project Shortlisted: ${selectedProp} in ${cityName}.\nUser verified on +91 ${regPhone}.`
+          message: `Additional Project Shortlisted: ${selectedProp} in ${cityName}.\nUser verified on ${formattedPhone}.`
         }).catch(() => {});
 
         const botMsg = {
           sender: 'bot',
-          text: `Awesome! ${selectedProp}${devText} features premium homes${bhkText} ${priceText} (Zero Brokerage). 🏢\n\n📞 Note: ${nameGreeting}your contact details (+91 ${regPhone}) are already registered! If you're interested in comparing multiple projects or exploring other cities, our Senior Property Advisor will provide you complete assistance and consolidated cost sheets directly on call/WhatsApp.\n\nFeel free to tap any option below or ask our advisor directly!`,
+          text: `Awesome! ${selectedProp}${devText} features premium homes${bhkText} ${priceText} (Zero Brokerage). 🏢\n\n📞 Note: ${nameGreeting}your contact details (${formattedPhone}) are already registered! If you're interested in comparing multiple projects or exploring other cities, our Senior Property Advisor will provide you complete assistance and consolidated cost sheets directly on call/WhatsApp.\n\nFeel free to tap any option below or ask our advisor directly!`,
           time: new Date()
         };
         setMessages((prev) => [...prev, botMsg]);
@@ -205,7 +215,7 @@ const AIChatbot = ({ isOpen, onClose }) => {
       if (leadDataRef.current.name) {
         const botMsg = {
           sender: 'bot',
-          text: `Awesome! ${selectedProp}${devText} features premium homes${bhkText} ${priceText} (Zero Brokerage). 🏢\n\nThank you, ${leadDataRef.current.name}! Could you please share your 10-digit mobile number so our team can send you the official brochure & pricing?`,
+          text: `Awesome! ${selectedProp}${devText} features premium homes${bhkText} ${priceText} (Zero Brokerage). 🏢\n\nThank you, ${leadDataRef.current.name}! Could you please share your mobile number so our team can send you the official brochure & pricing?`,
           time: new Date()
         };
         setMessages((prev) => [...prev, botMsg]);
@@ -227,21 +237,22 @@ const AIChatbot = ({ isOpen, onClose }) => {
         const customerName = leadDataRef.current.name ? `${leadDataRef.current.name}` : '';
         const nameGreeting = customerName ? `${customerName}, ` : '';
         const regPhone = leadDataRef.current.phone;
+        const formattedPhone = regPhone.startsWith('+') ? regPhone : `+91 ${regPhone}`;
 
         submitLead({
           formType: "AI Chatbot - Additional Shortlist",
           leadType: "AI Chatbot Lead",
           name: leadDataRef.current.name || 'Chatbot User',
-          phone: regPhone,
+          phone: formattedPhone,
           location: cityName,
           region: cityName,
           propertyName: `All ${cityName} Projects`,
-          message: `Browsing all projects in ${cityName}.\nUser verified on +91 ${regPhone}.`
+          message: `Browsing all projects in ${cityName}.\nUser verified on ${formattedPhone}.`
         }).catch(() => {});
 
         const botMsg = {
           sender: 'bot',
-          text: `Perfect! We have multiple verified developer projects across ${cityName} (1, 2, 3 & 4 BHK with Zero Brokerage). 🏢\n\n📞 Note: ${nameGreeting}our Senior Property Advisor will share the consolidated portfolio for ${cityName} on +91 ${regPhone}.\n\nIf you'd like to discuss or compare projects right now, tap "Ask Senior Advisor" below!`,
+          text: `Perfect! We have multiple verified developer projects across ${cityName} (1, 2, 3 & 4 BHK with Zero Brokerage). 🏢\n\n📞 Note: ${nameGreeting}our Senior Property Advisor will share the consolidated portfolio for ${cityName} on ${formattedPhone}.\n\nIf you'd like to discuss or compare projects right now, tap "Ask Senior Advisor" below!`,
           time: new Date()
         };
         setMessages((prev) => [...prev, botMsg]);
@@ -252,7 +263,7 @@ const AIChatbot = ({ isOpen, onClose }) => {
       if (leadDataRef.current.name) {
         const botMsg = {
           sender: 'bot',
-          text: `Perfect! We have multiple verified developer projects across ${cityName} (1, 2, 3 & 4 BHK with Zero Brokerage). 🏢\n\nThank you, ${leadDataRef.current.name}! Please share your 10-digit mobile number so we can send the consolidated portfolio on WhatsApp.`,
+          text: `Perfect! We have multiple verified developer projects across ${cityName} (1, 2, 3 & 4 BHK with Zero Brokerage). 🏢\n\nThank you, ${leadDataRef.current.name}! Please share your mobile number so we can send the consolidated portfolio on WhatsApp.`,
           time: new Date()
         };
         setMessages((prev) => [...prev, botMsg]);
@@ -263,6 +274,184 @@ const AIChatbot = ({ isOpen, onClose }) => {
       const botMsg = {
         sender: 'bot',
         text: `Perfect! We have multiple verified developer projects across ${cityName} (1, 2, 3 & 4 BHK with Zero Brokerage). 🏢\n\nOur team will share the complete consolidated project portfolio & master price sheet with you. May I know your full name please?`,
+        time: new Date()
+      };
+      setMessages((prev) => [...prev, botMsg]);
+      setLeadState('awaiting_name');
+    }
+  };
+
+  // Handler when user selects category (Residential vs Commercial)
+  const handleCategorySelect = async (categoryText) => {
+    const userMsg = { sender: 'user', text: categoryText, time: new Date() };
+    setMessages((prev) => [...prev, userMsg]);
+    setInputValue('');
+    setIsTyping(true);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    if (categoryText.toLowerCase().includes('commercial')) {
+      setLeadCategory('commercial');
+      if (!leadDataRef.current.phone) {
+        setLeadState('awaiting_commercial_location');
+      }
+      const botMsg = {
+        sender: 'bot',
+        text: `Excellent! We feature 24 prime Grade-A commercial developments across Navi Mumbai's major business corridors. 💼\n\nWhich commercial hub would you like to explore? Tap your preferred location below:`,
+        time: new Date(),
+        type: 'commercial_location_chips',
+        chips: VALID_COMMERCIAL_CITIES
+      };
+      setMessages((prev) => [...prev, botMsg]);
+    } else {
+      setLeadCategory('residential');
+      if (!leadDataRef.current.phone) {
+        setLeadState('awaiting_location');
+      }
+      const botMsg = {
+        sender: 'bot',
+        text: `Great choice! We have 50+ verified residential projects directly from top developers with zero brokerage. 🏡\n\nWhich location in Navi Mumbai are you looking for? Tap your preferred city below:`,
+        time: new Date(),
+        type: 'location_chips',
+        chips: VALID_CITIES
+      };
+      setMessages((prev) => [...prev, botMsg]);
+    }
+    setIsTyping(false);
+  };
+
+  // Present commercial projects for a chosen city
+  const presentCommercialProjectsForCity = async (cityName) => {
+    const allProjects = getCommercialProjectsForLocation(cityName, 50);
+    const chips = [...allProjects, `All ${cityName} Commercial`];
+
+    const botMsg = {
+      sender: 'bot',
+      text: `We feature verified Grade-A commercial spaces in ${cityName}. 🏢\n\nWhich commercial project would you like details for? Tap below:`,
+      time: new Date(),
+      type: 'commercial_project_chips',
+      chips: chips
+    };
+    setMessages((prev) => [...prev, botMsg]);
+
+    if (!leadDataRef.current.phone) {
+      setLeadState('awaiting_commercial_project');
+    }
+  };
+
+  // Handler when user clicks on a commercial location chip
+  const handleCommercialLocationSelect = async (cityName) => {
+    if (!cityName) return;
+
+    const userMsg = { sender: 'user', text: cityName, time: new Date() };
+    setMessages((prev) => [...prev, userMsg]);
+    setInputValue('');
+
+    setLeadData((prev) => ({ ...prev, location: cityName, propertyName: '' }));
+    setIsTyping(true);
+
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await presentCommercialProjectsForCity(cityName);
+    setIsTyping(false);
+  };
+
+  // Step 3 (Commercial): Present commercial project details
+  const presentCommercialProjectSelection = async (projectName, cityName) => {
+    const isAllProjects = projectName.startsWith('All ') && projectName.endsWith(' Commercial');
+    const selectedProp = isAllProjects ? '' : projectName;
+
+    setLeadData((prev) => ({ ...prev, propertyName: selectedProp, location: cityName }));
+
+    if (selectedProp) {
+      const details = getCommercialPropertyDetails(selectedProp);
+      const priceText = details?.price ? `starting from ${details.price}` : 'at direct developer rates';
+      const carpetText = details?.carpetArea ? ` (Carpet: ${details.carpetArea})` : '';
+      const devText = details?.developer ? ` by ${details.developer}` : '';
+
+      if (leadDataRef.current.phone) {
+        const customerName = leadDataRef.current.name ? `${leadDataRef.current.name}, ` : '';
+        const regPhone = leadDataRef.current.phone;
+        const formattedPhone = regPhone.startsWith('+') ? regPhone : `+91 ${regPhone}`;
+
+        submitLead({
+          formType: "AI Chatbot - Commercial Shortlist",
+          leadType: "Commercial Lead",
+          name: leadDataRef.current.name || 'Chatbot User',
+          phone: formattedPhone,
+          location: cityName,
+          region: cityName,
+          propertyName: selectedProp,
+          message: `Commercial Shortlisted: ${selectedProp} in ${cityName}.\nUser verified on ${formattedPhone}.`
+        }).catch(() => {});
+
+        const botMsg = {
+          sender: 'bot',
+          text: `Awesome! ${selectedProp}${devText} offers Grade-A commercial spaces${carpetText} ${priceText} with Zero Brokerage. 🏢\n\n📞 Note: ${customerName}your contact (${formattedPhone}) is already registered! Our Commercial Portfolio Manager will share detailed cost sheets & digital kits directly on WhatsApp.\n\nTap below if you want to explore more options!`,
+          time: new Date()
+        };
+        setMessages((prev) => [...prev, botMsg]);
+        setLeadState('completed');
+        return;
+      }
+
+      if (leadDataRef.current.name) {
+        const botMsg = {
+          sender: 'bot',
+          text: `Awesome! ${selectedProp}${devText} offers Grade-A commercial spaces${carpetText} ${priceText} with Zero Brokerage. 🏢\n\nThank you, ${leadDataRef.current.name}! Please share your mobile number to receive the official digital kit & commercial floor plans.`,
+          time: new Date()
+        };
+        setMessages((prev) => [...prev, botMsg]);
+        setLeadState('awaiting_number');
+        return;
+      }
+
+      const botMsg = {
+        sender: 'bot',
+        text: `Awesome! ${selectedProp}${devText} offers Grade-A commercial spaces${carpetText} ${priceText} with Zero Brokerage. 🏢\n\nTo share the verified cost sheet & digital kit, may I know your full name please?`,
+        time: new Date()
+      };
+      setMessages((prev) => [...prev, botMsg]);
+      setLeadState('awaiting_name');
+    } else {
+      if (leadDataRef.current.phone) {
+        const customerName = leadDataRef.current.name ? `${leadDataRef.current.name}, ` : '';
+        const regPhone = leadDataRef.current.phone;
+        const formattedPhone = regPhone.startsWith('+') ? regPhone : `+91 ${regPhone}`;
+
+        submitLead({
+          formType: "AI Chatbot - Commercial Portfolio Request",
+          leadType: "Commercial Lead",
+          name: leadDataRef.current.name || 'Chatbot User',
+          phone: formattedPhone,
+          location: cityName,
+          region: cityName,
+          propertyName: `All ${cityName} Commercial Hubs`,
+          message: `Commercial Portfolio requested for ${cityName}.\nUser verified on ${formattedPhone}.`
+        }).catch(() => {});
+
+        const botMsg = {
+          sender: 'bot',
+          text: `Perfect! We have multiple Grade-A commercial developments in ${cityName}. 🏢\n\n📞 Note: ${customerName}our Commercial Desk will send the complete portfolio to ${formattedPhone}.`,
+          time: new Date()
+        };
+        setMessages((prev) => [...prev, botMsg]);
+        setLeadState('completed');
+        return;
+      }
+
+      if (leadDataRef.current.name) {
+        const botMsg = {
+          sender: 'bot',
+          text: `Perfect! We have multiple Grade-A commercial developments in ${cityName}. 🏢\n\nThank you, ${leadDataRef.current.name}! Please share your mobile number to receive the consolidated commercial portfolio on WhatsApp.`,
+          time: new Date()
+        };
+        setMessages((prev) => [...prev, botMsg]);
+        setLeadState('awaiting_number');
+        return;
+      }
+
+      const botMsg = {
+        sender: 'bot',
+        text: `Perfect! We have multiple Grade-A commercial developments in ${cityName}. 🏢\n\nOur team will share the consolidated commercial portfolio with you. May I know your full name please?`,
         time: new Date()
       };
       setMessages((prev) => [...prev, botMsg]);
@@ -312,7 +501,12 @@ const AIChatbot = ({ isOpen, onClose }) => {
 
     setIsTyping(true);
     await new Promise((resolve) => setTimeout(resolve, 500));
-    await presentProjectSelection(projectName, leadDataRef.current.location || 'Navi Mumbai');
+
+    if (leadCategoryRef.current === 'commercial' || findMatchedCommercialProject(projectName)) {
+      await presentCommercialProjectSelection(projectName, leadDataRef.current.location || 'Navi Mumbai');
+    } else {
+      await presentProjectSelection(projectName, leadDataRef.current.location || 'Navi Mumbai');
+    }
     setIsTyping(false);
   };
 
@@ -331,17 +525,36 @@ const AIChatbot = ({ isOpen, onClose }) => {
       if (leadState === 'completed' || leadDataRef.current.phone) {
         await new Promise((resolve) => setTimeout(resolve, 500));
 
-        // Did the user type a city name?
+        // Did the user type a commercial city name?
+        const matchedCommCity = findMatchedCommercialLocation(messageText);
+        if (matchedCommCity) {
+          setLeadCategory('commercial');
+          setLeadData((prev) => ({ ...prev, location: matchedCommCity, propertyName: '' }));
+          await presentCommercialProjectsForCity(matchedCommCity);
+          return;
+        }
+
+        // Did the user type a residential city name?
         const matchedCity = findMatchedLocation(messageText);
         if (matchedCity) {
+          setLeadCategory('residential');
           setLeadData((prev) => ({ ...prev, location: matchedCity, propertyName: '' }));
           await presentProjectsForCity(matchedCity);
           return;
         }
 
-        // Did the user type a project name?
+        // Did the user type a commercial project name?
+        const matchedCommProp = findMatchedCommercialProject(messageText, leadDataRef.current.location);
+        if (matchedCommProp) {
+          setLeadCategory('commercial');
+          await presentCommercialProjectSelection(matchedCommProp, leadDataRef.current.location || 'Navi Mumbai');
+          return;
+        }
+
+        // Did the user type a residential project name?
         const matchedProp = findMatchedProject(messageText, leadDataRef.current.location);
         if (matchedProp) {
+          setLeadCategory('residential');
           await presentProjectSelection(matchedProp, leadDataRef.current.location || 'Navi Mumbai');
           return;
         }
@@ -350,17 +563,56 @@ const AIChatbot = ({ isOpen, onClose }) => {
           ? `${leadDataRef.current.propertyName} (${leadDataRef.current.location})` 
           : (leadDataRef.current.location || 'Navi Mumbai');
         const phone = leadDataRef.current.phone || 'your number';
+        const formattedPhone = phone.startsWith('+') ? phone : `+91 ${phone}`;
 
         const botMsg = {
           sender: 'bot',
-          text: `Got it! 👍 Our Senior Property Advisor has your enquiry registered for ${target} and will address this directly on call at +91 ${phone}.\n\nIf you'd like to connect immediately or compare across multiple cities, you can call our direct developer desk at +91 7718853773.`,
+          text: `Got it! 👍 Our Senior Property Advisor has your enquiry registered for ${target} and will address this directly on call at ${formattedPhone}.\n\nIf you'd like to connect immediately or compare across multiple locations, you can call our developer desk at +91 7718853773.`,
           time: new Date()
         };
         setMessages((prev) => [...prev, botMsg]);
         return;
       }
 
-      // 1. If currently awaiting location:
+      // 0a. If currently awaiting category (Residential vs Commercial):
+      if (leadState === 'awaiting_category') {
+        const lower = messageText.toLowerCase();
+        if (lower.includes('comm') || lower.includes('office') || lower.includes('retail') || lower.includes('shop') || lower.includes('business')) {
+          await handleCategorySelect('🏢 Commercial Spaces');
+          return;
+        }
+        if (lower.includes('res') || lower.includes('home') || lower.includes('flat') || lower.includes('apartment') || lower.includes('bhk') || lower.includes('house')) {
+          await handleCategorySelect('🏡 Residential Homes');
+          return;
+        }
+
+        const matchedCommCity = findMatchedCommercialLocation(messageText);
+        if (matchedCommCity) {
+          await handleCategorySelect('🏢 Commercial Spaces');
+          await presentCommercialProjectsForCity(matchedCommCity);
+          return;
+        }
+
+        const matchedCity = findMatchedLocation(messageText);
+        if (matchedCity) {
+          await handleCategorySelect('🏡 Residential Homes');
+          await presentProjectsForCity(matchedCity);
+          return;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        const botMsg = {
+          sender: 'bot',
+          text: `Are you looking for Residential homes or Commercial office/retail spaces? Please tap your preference below:`,
+          time: new Date(),
+          type: 'category_chips',
+          chips: ['🏡 Residential Homes', '🏢 Commercial Spaces']
+        };
+        setMessages((prev) => [...prev, botMsg]);
+        return;
+      }
+
+      // 1. If currently awaiting residential location:
       if (leadState === 'awaiting_location') {
         const matched = findMatchedLocation(messageText);
 
@@ -372,7 +624,7 @@ const AIChatbot = ({ isOpen, onClose }) => {
           await new Promise((resolve) => setTimeout(resolve, 500));
           const botMsg = {
             sender: 'bot',
-            text: `We currently feature verified direct developer projects in Kharghar, Seawoods, Palm Beach, Panvel, Vashi, Nerul, Belapur, Airoli, Taloja, Juinagar, Sanpada, Ghansoli & Roadpali.\n\nPlease tap your preferred city below:`,
+            text: `We feature verified direct developer residential projects across Kharghar, Palm Beach Road, Thane-Belapur Road, Panvel, Vashi, Nerul, Belapur, Airoli, Seawoods, Taloja, Juinagar, Sanpada, Ghansoli & Roadpali.\n\nPlease tap your preferred location below:`,
             time: new Date(),
             type: 'location_chips',
             chips: VALID_CITIES
@@ -382,7 +634,29 @@ const AIChatbot = ({ isOpen, onClose }) => {
         return;
       }
 
-      // 2. If awaiting project selection:
+      // 1b. If currently awaiting commercial location:
+      if (leadState === 'awaiting_commercial_location') {
+        const matched = findMatchedCommercialLocation(messageText);
+
+        if (matched) {
+          setLeadData((prev) => ({ ...prev, location: matched, propertyName: '' }));
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          await presentCommercialProjectsForCity(matched);
+        } else {
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          const botMsg = {
+            sender: 'bot',
+            text: `We feature Grade-A commercial projects across Vashi, Turbhe, Nerul, Juinagar, Airoli, Mahape, Digha, Rabale & Koparkhairane.\n\nPlease tap your preferred commercial hub below:`,
+            time: new Date(),
+            type: 'commercial_location_chips',
+            chips: VALID_COMMERCIAL_CITIES
+          };
+          setMessages((prev) => [...prev, botMsg]);
+        }
+        return;
+      }
+
+      // 2. If awaiting residential project selection:
       if (leadState === 'awaiting_project') {
         const lower = messageText.toLowerCase();
         if (lower === 'all' || lower.includes('all projects') || lower === 'any' || lower === 'skip') {
@@ -399,24 +673,46 @@ const AIChatbot = ({ isOpen, onClose }) => {
         return;
       }
 
+      // 2b. If awaiting commercial project selection:
+      if (leadState === 'awaiting_commercial_project') {
+        const lower = messageText.toLowerCase();
+        if (lower === 'all' || lower.includes('all') || lower === 'any' || lower === 'skip') {
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          await presentCommercialProjectSelection(`All ${leadDataRef.current.location} Commercial`, leadDataRef.current.location);
+          return;
+        }
+
+        const matchedProp = findMatchedCommercialProject(messageText, leadDataRef.current.location);
+        const propName = matchedProp || messageText;
+
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        await presentCommercialProjectSelection(propName, leadDataRef.current.location);
+        return;
+      }
+
       // 3. If awaiting user name:
       if (leadState === 'awaiting_name') {
         // If user directly entered phone number instead of name:
-        const parsedPhone = parsePhoneNumber(messageText);
-        if (parsedPhone) {
+        const phoneResult = validatePhoneNumber(messageText, selectedCountryCodeRef.current);
+        if (phoneResult.isValid) {
           const chosenLocation = leadDataRef.current.location || 'Navi Mumbai';
           const chosenProject = leadDataRef.current.propertyName || '';
           const customerName = leadDataRef.current.name || 'Valued Client';
+          const validPhone = phoneResult.fullNumber;
 
-          setLeadData((prev) => ({ ...prev, phone: parsedPhone }));
-          saveLeadSession({ name: customerName, phone: parsedPhone });
+          if (phoneResult.country?.code) {
+            setSelectedCountryCode(phoneResult.country.code);
+          }
+
+          setLeadData((prev) => ({ ...prev, phone: validPhone }));
+          saveLeadSession({ name: customerName, phone: validPhone });
           await new Promise((resolve) => setTimeout(resolve, 600));
 
           submitLead({
             formType: "AI Chatbot Lead",
             leadType: "AI Chatbot Lead",
             name: customerName,
-            phone: parsedPhone,
+            phone: validPhone,
             location: chosenLocation,
             region: chosenLocation,
             propertyName: chosenProject,
@@ -428,7 +724,7 @@ const AIChatbot = ({ isOpen, onClose }) => {
           const successTarget = chosenProject ? `${chosenProject} (${chosenLocation})` : chosenLocation;
           const botMsg = {
             sender: 'bot',
-            text: `Thank you, ${customerName}! 🎉 Your request for ${successTarget} has been registered.\n\nOur property specialist will call you shortly on +91 ${parsedPhone} with direct developer pricing and floor plans.`,
+            text: `Thank you, ${customerName}! 🎉 Your request for ${successTarget} has been registered.\n\nOur developer team will call you shortly on ${validPhone} with direct developer pricing and floor plans.`,
             time: new Date()
           };
           setMessages((prev) => [...prev, botMsg]);
@@ -445,9 +741,12 @@ const AIChatbot = ({ isOpen, onClose }) => {
             ? ` for ${leadDataRef.current.propertyName}` 
             : (leadDataRef.current.location ? ` in ${leadDataRef.current.location}` : '');
 
+          const selectedCountry = getCountryByCode(selectedCountryCodeRef.current);
+          const numHint = selectedCountry.code === '+91' ? '10-digit mobile number' : 'mobile number';
+
           const botMsg = {
             sender: 'bot',
-            text: `Thank you, ${messageText}! Could you please share your 10-digit mobile number so our team can send you direct developer brochures & pricing${targetLabel}?`,
+            text: `Thank you, ${messageText}! Could you please share your ${numHint} so our team can send you direct developer brochures & pricing${targetLabel}?`,
             time: new Date()
           };
           setMessages((prev) => [...prev, botMsg]);
@@ -466,18 +765,21 @@ const AIChatbot = ({ isOpen, onClose }) => {
 
       // 4. If awaiting phone number:
       if (leadState === 'awaiting_number') {
-        const parsedPhone = parsePhoneNumber(messageText);
+        const phoneResult = validatePhoneNumber(messageText, selectedCountryCodeRef.current);
 
-        if (!parsedPhone) {
+        if (!phoneResult.isValid) {
           // If user re-typed or entered their name (e.g., 'sachin') instead of digits
           if (isValidFullName(messageText)) {
             setLeadData((prev) => ({ ...prev, name: messageText }));
             saveLeadSession({ name: messageText, phone: leadDataRef.current.phone || '' });
             await new Promise((resolve) => setTimeout(resolve, 500));
 
+            const selectedCountry = getCountryByCode(selectedCountryCodeRef.current);
+            const numHint = selectedCountry.code === '+91' ? '10-digit mobile number' : 'mobile number';
+
             const botMsg = {
               sender: 'bot',
-              text: `Got it, ${messageText}! 👍 Could you please share your 10-digit mobile number (e.g., 9876543210) so we can send the floor plans & cost sheet on WhatsApp?`,
+              text: `Got it, ${messageText}! 👍 Could you please share your ${numHint} so we can send the floor plans & cost sheet on WhatsApp?`,
               time: new Date()
             };
             setMessages((prev) => [...prev, botMsg]);
@@ -487,7 +789,7 @@ const AIChatbot = ({ isOpen, onClose }) => {
           await new Promise((resolve) => setTimeout(resolve, 500));
           const botMsg = {
             sender: 'bot',
-            text: "Please enter a valid 10-digit mobile number (e.g., 9876543210) without country code or spaces.",
+            text: phoneResult.errorMsg,
             time: new Date()
           };
           setMessages((prev) => [...prev, botMsg]);
@@ -495,19 +797,24 @@ const AIChatbot = ({ isOpen, onClose }) => {
         }
 
         // Valid phone entered!
+        const validPhone = phoneResult.fullNumber;
+        if (phoneResult.country?.code) {
+          setSelectedCountryCode(phoneResult.country.code);
+        }
+
         const chosenLocation = leadDataRef.current.location || 'Navi Mumbai';
         const chosenProject = leadDataRef.current.propertyName || '';
         const customerName = leadDataRef.current.name || 'Chatbot User';
 
-        setLeadData((prev) => ({ ...prev, phone: parsedPhone }));
-        saveLeadSession({ name: customerName, phone: parsedPhone });
+        setLeadData((prev) => ({ ...prev, phone: validPhone }));
+        saveLeadSession({ name: customerName, phone: validPhone });
         await new Promise((resolve) => setTimeout(resolve, 600));
 
         submitLead({
           formType: "AI Chatbot Lead",
           leadType: "AI Chatbot Lead",
           name: customerName,
-          phone: parsedPhone,
+          phone: validPhone,
           location: chosenLocation,
           region: chosenLocation,
           propertyName: chosenProject,
@@ -519,7 +826,7 @@ const AIChatbot = ({ isOpen, onClose }) => {
         const successTarget = chosenProject ? `${chosenProject} (${chosenLocation})` : chosenLocation;
         const botMsg = {
           sender: 'bot',
-          text: `Thank you, ${customerName}! 🎉 Your request for ${successTarget} has been registered.\n\nOur property specialist will call you shortly on +91 ${parsedPhone} with direct developer pricing and floor plans.`,
+          text: `Thank you, ${customerName}! 🎉 Your request for ${successTarget} has been registered.\n\nOur developer team will call you shortly on ${validPhone} with direct developer pricing and floor plans.`,
           time: new Date()
         };
         setMessages((prev) => [...prev, botMsg]);
@@ -554,6 +861,7 @@ const AIChatbot = ({ isOpen, onClose }) => {
     const devText = details?.developer || 'Developer';
     const hasPhone = Boolean(leadDataRef.current.phone);
     const regPhone = leadDataRef.current.phone;
+    const formattedPhone = regPhone ? (regPhone.startsWith('+') ? regPhone : `+91 ${regPhone}`) : '';
     const currentName = leadDataRef.current.name;
 
     if (action === 'pricing') {
@@ -564,9 +872,9 @@ const AIChatbot = ({ isOpen, onClose }) => {
 
       let botResponseText = '';
       if (hasPhone) {
-        botResponseText = `Pricing for ${project || city} starts from ${priceText} directly from ${devText} with Zero Brokerage. 🏢\n\n📞 Note: Your enquiry is registered! Our Senior Advisor will share the detailed unit-wise cost sheet on your number (+91 ${regPhone}).`;
+        botResponseText = `Pricing for ${project || city} starts from ${priceText} directly from ${devText} with Zero Brokerage. 🏢\n\n📞 Note: Your enquiry is registered! Our Senior Advisor will share the detailed unit-wise cost sheet on your number (${formattedPhone}).`;
       } else if (currentName) {
-        botResponseText = `Pricing for ${project || city} starts from ${priceText} directly from ${devText} with Zero Brokerage. 🏢\n\nThank you, ${currentName}! Could you please share your 10-digit mobile number so our team can send you the complete cost sheet & floor plans?`;
+        botResponseText = `Pricing for ${project || city} starts from ${priceText} directly from ${devText} with Zero Brokerage. 🏢\n\nThank you, ${currentName}! Could you please share your mobile number so our team can send you the complete cost sheet & floor plans?`;
         setLeadState('awaiting_number');
       } else {
         botResponseText = `Pricing for ${project || city} starts from ${priceText} directly from ${devText} (Zero Brokerage).\n\nTo share the unit-wise cost sheet and payment plan, may I know your full name please?`;
@@ -586,9 +894,9 @@ const AIChatbot = ({ isOpen, onClose }) => {
 
       let botResponseText = '';
       if (hasPhone) {
-        botResponseText = `Official brochure and floor plans for ${project || city} will be delivered to your WhatsApp on +91 ${regPhone}. 📄`;
+        botResponseText = `Official brochure and floor plans for ${project || city} will be delivered to your WhatsApp on ${formattedPhone}. 📄`;
       } else if (currentName) {
-        botResponseText = `Thank you, ${currentName}! Please share your 10-digit mobile number so we can deliver the high-resolution brochure directly to your WhatsApp.`;
+        botResponseText = `Thank you, ${currentName}! Please share your mobile number so we can deliver the high-resolution brochure directly to your WhatsApp.`;
         setLeadState('awaiting_number');
       } else {
         botResponseText = `We can deliver the official high-resolution brochure and floor plans for ${project || city} directly to your WhatsApp!\n\nMay I know your full name please?`;
@@ -608,9 +916,9 @@ const AIChatbot = ({ isOpen, onClose }) => {
 
       let botResponseText = '';
       if (hasPhone) {
-        botResponseText = `We will arrange your free door-to-door AC cab visit for ${project || city}! 🚗 Our coordinator will call you on +91 ${regPhone} to confirm your preferred timing.`;
+        botResponseText = `We will arrange your free door-to-door AC cab visit for ${project || city}! 🚗 Our coordinator will call you on ${formattedPhone} to confirm your preferred timing.`;
       } else if (currentName) {
-        botResponseText = `Great, ${currentName}! We arrange free door-to-door AC cab pick-up & drop for site visits. 🚗\n\nPlease share your 10-digit mobile number to schedule your visit.`;
+        botResponseText = `Great, ${currentName}! We arrange free door-to-door AC cab pick-up & drop for site visits. 🚗\n\nPlease share your mobile number to schedule your visit.`;
         setLeadState('awaiting_number');
       } else {
         botResponseText = `We arrange free door-to-door AC cab pick-up & drop for site visits at ${project || city}! 🚗\n\nTo schedule your visit, may I know your full name please?`;
@@ -630,9 +938,9 @@ const AIChatbot = ({ isOpen, onClose }) => {
 
       let botResponseText = '';
       if (hasPhone) {
-        botResponseText = `📞 Our Senior Property Advisor is assigned to your enquiry on +91 ${regPhone}.\n\nThey can help you:\n• Compare projects across multiple cities\n• Negotiate special direct developer discounts\n• Check unit layouts & bank loan eligibility\n\nYou can also speak directly with our desk at +91 7718853773.`;
+        botResponseText = `📞 Our Senior Property Advisor is assigned to your enquiry on ${formattedPhone}.\n\nThey can help you:\n• Compare projects across multiple cities\n• Negotiate special direct developer discounts\n• Check unit layouts & bank loan eligibility\n\nYou can also speak directly with our desk at +91 7718853773.`;
       } else if (currentName) {
-        botResponseText = `Thank you, ${currentName}! Please share your 10-digit mobile number so our Senior Property Advisor can connect with you directly.`;
+        botResponseText = `Thank you, ${currentName}! Please share your mobile number so our Senior Property Advisor can connect with you directly.`;
         setLeadState('awaiting_number');
       } else {
         botResponseText = `Our Senior Property Advisors provide unbiased comparisons across all top developers in Navi Mumbai with Zero Brokerage.\n\nMay I know your full name please to connect you?`;
@@ -727,7 +1035,10 @@ const AIChatbot = ({ isOpen, onClose }) => {
     if (leadState === 'awaiting_location') return "Type city or tap a chip above...";
     if (leadState === 'awaiting_project') return "Select project chip above...";
     if (leadState === 'awaiting_name') return "Enter your full name...";
-    if (leadState === 'awaiting_number') return "Enter 10-digit mobile number...";
+    if (leadState === 'awaiting_number') {
+      const country = getCountryByCode(selectedCountryCode);
+      return country.code === '+91' ? "Enter 10-digit mobile number..." : `e.g. ${country.example} (${country.name})`;
+    }
     return "Type a message...";
   };
 
@@ -780,27 +1091,25 @@ const AIChatbot = ({ isOpen, onClose }) => {
           <button
             type="button"
             onClick={() => {
-              // Reset ONLY location and project, preserve user name and phone!
+              // Reset location and project, preserve user name and phone!
               setLeadData((prev) => ({ ...prev, location: '', propertyName: '' }));
               if (!leadDataRef.current.phone) {
-                setLeadState('awaiting_location');
+                setLeadState('awaiting_category');
               }
               setMessages((prev) => [
                 ...prev,
                 {
                   sender: 'bot',
-                  text: leadDataRef.current.phone
-                    ? "Sure! Which other city in Navi Mumbai would you like to explore? Tap below:"
-                    : "Sure! Which location in Navi Mumbai would you like to explore? Tap below:",
+                  text: "Sure! What type of property would you like to explore? Tap below:",
                   time: new Date(),
-                  type: 'location_chips',
-                  chips: VALID_CITIES
+                  type: 'category_chips',
+                  chips: ['🏡 Residential Homes', '🏢 Commercial Spaces']
                 }
               ]);
             }}
             className="text-[10px] bg-white hover:bg-gold hover:text-white text-gold-darker border border-gold/30 px-2 py-0.5 rounded-full font-semibold transition-all shrink-0 cursor-pointer"
           >
-            Reset City
+            Change Type / Location
           </button>
         </div>
       )}
@@ -834,23 +1143,29 @@ const AIChatbot = ({ isOpen, onClose }) => {
             }`}>
               <p className="whitespace-pre-line">{msg.text}</p>
 
-              {/* Location or Project Chips attached to Bot Message */}
+              {/* Location, Category, or Project Chips attached to Bot Message */}
               {msg.chips && msg.chips.length > 0 && (
                 <div className="mt-2.5 pt-2 border-t border-sage-border/40">
-                  <span className="text-[10px] uppercase font-bold tracking-wider text-sage-muted mb-1.5 block flex items-center gap-1">
-                    {msg.type === 'project_chips' ? (
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-sage-muted mb-1.5 flex items-center gap-1">
+                    {msg.type === 'category_chips' ? (
+                      <>
+                        <Briefcase className="w-3 h-3 text-gold" /> Select Property Type:
+                      </>
+                    ) : msg.type === 'project_chips' || msg.type === 'commercial_project_chips' ? (
                       <>
                         <Building2 className="w-3 h-3 text-gold" /> Select Project:
                       </>
                     ) : (
                       <>
-                        <MapPin className="w-3 h-3 text-gold" /> Select City:
+                        <MapPin className="w-3 h-3 text-gold" /> Select Location:
                       </>
                     )}
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {msg.chips.map((chipLabel) => {
-                      const isProject = msg.type === 'project_chips';
+                      const isCategory = msg.type === 'category_chips';
+                      const isProject = msg.type === 'project_chips' || msg.type === 'commercial_project_chips';
+                      const isCommLocation = msg.type === 'commercial_location_chips';
                       const isAllOption = chipLabel.startsWith('All ');
 
                       return (
@@ -858,19 +1173,27 @@ const AIChatbot = ({ isOpen, onClose }) => {
                           key={chipLabel}
                           type="button"
                           onClick={() => {
-                            if (isProject) {
+                            if (isCategory) {
+                              handleCategorySelect(chipLabel);
+                            } else if (isCommLocation) {
+                              handleCommercialLocationSelect(chipLabel);
+                            } else if (isProject) {
                               handleProjectSelect(chipLabel);
                             } else {
                               handleLocationSelect(chipLabel);
                             }
                           }}
                           className={`text-[11px] font-sans font-semibold border px-2.5 py-1 rounded-full transition-all duration-150 flex items-center gap-1 cursor-pointer active:scale-95 shadow-xs ${
-                            isAllOption
+                            isCategory
+                              ? 'bg-emerald-50 hover:bg-[#0F2A23] hover:text-white text-[#0F2A23] border-emerald-300 font-bold py-1.5 px-3'
+                              : isAllOption
                               ? 'bg-amber-100/80 hover:bg-gold hover:text-white text-amber-900 border-gold/40 font-bold'
                               : 'bg-gold/10 hover:bg-gold hover:text-white text-gold-darker border-gold/30'
                           }`}
                         >
-                          {isProject ? (
+                          {isCategory ? (
+                            <Briefcase className="w-3 h-3 text-gold shrink-0" />
+                          ) : isProject ? (
                             <Building2 className="w-2.5 h-2.5 text-gold shrink-0" />
                           ) : (
                             <MapPin className="w-2.5 h-2.5 text-gold shrink-0" />
@@ -947,6 +1270,15 @@ const AIChatbot = ({ isOpen, onClose }) => {
         onSubmit={handleSubmit}
         className="p-3 border-t border-sage-border/50 bg-white flex items-center gap-2"
       >
+        {leadState === 'awaiting_number' && (
+          <CountryCodeDropdown
+            value={selectedCountryCode}
+            onChange={(code) => setSelectedCountryCode(code)}
+            placement="top"
+            buttonClassName="py-2 px-2 rounded-xl bg-sage-input border-sage-border/80 text-xs"
+          />
+        )}
+
         <div className="relative flex-grow">
           <input
             ref={inputRef}

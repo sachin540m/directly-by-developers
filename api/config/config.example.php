@@ -36,7 +36,7 @@ return [
         'password'   => getenv('SMTP_PASSWORD') ?: 'YOUR_HOSTINGER_EMAIL_PASSWORD_HERE',
         'from_email' => getenv('SMTP_FROM_EMAIL') ?: 'connect@directlybydevelopers.com',
         'from_name'  => getenv('SMTP_FROM_NAME') ?: 'Directly By Developers Lead Desk',
-        'to_email'   => getenv('SMTP_TO_EMAIL') ?: 'connect@directlybydevelopers.com',
+        'to_email'   => getenv('SMTP_TO_EMAIL') ?: 'sachinmaurya.work@gmail.com',
         'timeout'    => 15,
     ],
 
