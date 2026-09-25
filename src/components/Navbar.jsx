@@ -33,14 +33,7 @@ const PALM_BEACH_ROAD_IDS = [
   'sai-palm-view',
   'delta-palm-beach-seawoods',
   'palm-amore-seawoods',
-  'sai-green-gold',
-  'platinum-oakwoods-seawoods',
-  'pioneer-the-view',
-  'godrej-eternal-palms',
-  'godrej-bayview',
-  'arihant-advika',
-  'sun-view-heights-vashi',
-  'metricon-gateway-vashi'
+  'godrej-eternal-palms'
 ];
 
 // Verified projects directly on or within 1-2 minutes of Thane-Belapur Road

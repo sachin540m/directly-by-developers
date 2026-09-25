@@ -24,36 +24,46 @@ const DeveloperPartners = ({ onExploreClick }) => {
             <div className="animate-scroll-ticker flex items-center">
               {/* First Loop */}
               <div className="flex items-center gap-4 sm:gap-5 pr-4 sm:pr-5 shrink-0">
-                {[...developers, ...developers].map((dev, index) => (
-                  <React.Fragment key={`first-${dev.id}-${index}`}>
-                    <div className="flex items-center justify-center h-12 sm:h-14 max-w-[150px] sm:max-w-[180px] transition-all duration-300 transform hover:scale-105 shrink-0 px-1">
-                      <img
-                        src={dev.logo}
-                        alt={dev.name}
-                        loading="lazy"
-                        className="max-h-full max-w-full object-contain filter drop-shadow-sm"
-                      />
-                    </div>
-                    <span className="text-[#B58A3C] text-[6px] select-none shrink-0 opacity-70">◆</span>
-                  </React.Fragment>
-                ))}
+                {[...developers, ...developers].map((dev, index) => {
+                  const isBoosted = ['lakhani', 'mahaavir', 'kolte-patil'].includes(dev.id);
+                  return (
+                    <React.Fragment key={`first-${dev.id}-${index}`}>
+                      <div className="flex items-center justify-center h-12 sm:h-14 max-w-[150px] sm:max-w-[180px] transition-all duration-300 transform hover:scale-105 shrink-0 px-1">
+                        <img
+                          src={dev.logo}
+                          alt={dev.name}
+                          loading="lazy"
+                          className={`max-h-full max-w-full object-contain filter drop-shadow-sm transition-transform duration-300 ${
+                            isBoosted ? 'scale-[1.35] sm:scale-[1.4]' : ''
+                          }`}
+                        />
+                      </div>
+                      <span className="text-[#B58A3C] text-[6px] select-none shrink-0 opacity-70">◆</span>
+                    </React.Fragment>
+                  );
+                })}
               </div>
 
               {/* Second Loop for Infinite Scrolling */}
               <div className="flex items-center gap-4 sm:gap-5 pr-4 sm:pr-5 shrink-0" aria-hidden="true">
-                {[...developers, ...developers].map((dev, index) => (
-                  <React.Fragment key={`second-${dev.id}-${index}`}>
-                    <div className="flex items-center justify-center h-12 sm:h-14 max-w-[150px] sm:max-w-[180px] transition-all duration-300 transform hover:scale-105 shrink-0 px-1">
-                      <img
-                        src={dev.logo}
-                        alt={dev.name}
-                        loading="lazy"
-                        className="max-h-full max-w-full object-contain filter drop-shadow-sm"
-                      />
-                    </div>
-                    <span className="text-[#B58A3C] text-[6px] select-none shrink-0 opacity-70">◆</span>
-                  </React.Fragment>
-                ))}
+                {[...developers, ...developers].map((dev, index) => {
+                  const isBoosted = ['lakhani', 'mahaavir', 'kolte-patil'].includes(dev.id);
+                  return (
+                    <React.Fragment key={`second-${dev.id}-${index}`}>
+                      <div className="flex items-center justify-center h-12 sm:h-14 max-w-[150px] sm:max-w-[180px] transition-all duration-300 transform hover:scale-105 shrink-0 px-1">
+                        <img
+                          src={dev.logo}
+                          alt={dev.name}
+                          loading="lazy"
+                          className={`max-h-full max-w-full object-contain filter drop-shadow-sm transition-transform duration-300 ${
+                            isBoosted ? 'scale-[1.35] sm:scale-[1.4]' : ''
+                          }`}
+                        />
+                      </div>
+                      <span className="text-[#B58A3C] text-[6px] select-none shrink-0 opacity-70">◆</span>
+                    </React.Fragment>
+                  );
+                })}
               </div>
             </div>
           </div>

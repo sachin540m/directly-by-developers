@@ -471,7 +471,7 @@
 .animate-scroll-ticker {
   display: flex;
   width: max-content;
-  animation: scrollTicker 55s linear infinite;
+  animation: scrollTicker 100s linear infinite;
   will-change: transform;
 }
 
