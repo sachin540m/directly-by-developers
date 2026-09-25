@@ -29,7 +29,7 @@ const PropertyCard = ({ property, onEnquire }) => {
         >
           <img
             src={image}
-            alt={name}
+            alt={`${name} by ${developer} - ${bhk} in ${location}, ${city}`}
             loading="lazy"
             onLoad={() => setImageLoaded(true)}
             className={`w-full h-full object-cover ken-burns-img transition-opacity duration-500 ${
