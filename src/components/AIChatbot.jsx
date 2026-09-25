@@ -768,7 +768,7 @@ const AIChatbot = ({ isOpen, onClose }) => {
         const phoneResult = validatePhoneNumber(messageText, selectedCountryCodeRef.current);
 
         if (!phoneResult.isValid) {
-          // If user re-typed or entered their name (e.g., 'sachin') instead of digits
+          // If user re-typed or entered their name (e.g., 'rahul') instead of digits
           if (isValidFullName(messageText)) {
             setLeadData((prev) => ({ ...prev, name: messageText }));
             saveLeadSession({ name: messageText, phone: leadDataRef.current.phone || '' });
